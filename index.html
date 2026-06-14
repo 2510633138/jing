@@ -418,14 +418,20 @@
         }
 
         class FloatingEye {
-            constructor() {
+            constructor(forceBottom) {
+                this.forceBottom = forceBottom;
                 this.reset();
             }
 
             reset() {
-                // 分散到整个画面，包括边角
-                this.x = 10 + Math.random() * (eyeCanvas.width - 20);
-                this.y = 10 + Math.random() * (eyeCanvas.height - 20);
+                // 如果标记为底部眼睛，则 y 范围在画面下半部分
+                if (this.forceBottom) {
+                    this.x = 10 + Math.random() * (eyeCanvas.width - 20);
+                    this.y = eyeCanvas.height * 0.55 + Math.random() * (eyeCanvas.height * 0.45 - 20);
+                } else {
+                    this.x = 10 + Math.random() * (eyeCanvas.width - 20);
+                    this.y = 10 + Math.random() * (eyeCanvas.height - 20);
+                }
                 this.size = 16 + Math.random() * 40;
                 this.blinkInterval = 100 + Math.random() * 250;
                 this.blinkTimer = Math.floor(Math.random() * this.blinkInterval);
@@ -439,7 +445,6 @@
                 this.originY = this.y;
                 this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.2;
                 this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.2;
-                // 虹膜用暗红色
                 const redVal = 130 + Math.floor(Math.random() * 70);
                 this.irisColor = `rgba(${redVal}, ${15 + Math.floor(Math.random() * 25)}, ${10 + Math.floor(Math.random() * 20)}, 0.85)`;
                 this.pupilColor = '#0a0000';
@@ -502,7 +507,7 @@
                     }
                 }
 
-                // 虹膜 - 红色系
+                // 虹膜
                 const irisR = Math.floor(halfS * 0.55);
                 const irisHeight = Math.floor(irisR * (1 - blinkRatio));
                 if (irisHeight > 0) {
@@ -550,7 +555,6 @@
                     }
                 }
 
-                // 眼睑边框
                 if (blinkRatio < 0.9) {
                     ctx.strokeStyle = 'rgba(100, 50, 40, 0.5)';
                     ctx.lineWidth = 2;
@@ -562,12 +566,18 @@
         }
 
         let eyes = [];
-        const EYE_COUNT = 13;
+        const TOP_EYE_COUNT = 6;
+        const BOTTOM_EYE_COUNT = 7;
 
         function initEyes() {
             eyes = [];
-            for (let i = 0; i < EYE_COUNT; i++) {
-                eyes.push(new FloatingEye());
+            // 上半部分的自由分布眼睛
+            for (let i = 0; i < TOP_EYE_COUNT; i++) {
+                eyes.push(new FloatingEye(false));
+            }
+            // 底部强制分布在画面下半部分
+            for (let i = 0; i < BOTTOM_EYE_COUNT; i++) {
+                eyes.push(new FloatingEye(true));
             }
         }
 
