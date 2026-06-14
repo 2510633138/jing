@@ -31,6 +31,7 @@
             overflow: hidden;
         }
 
+        /* ========== 封面 ========== */
         #cover-screen {
             position: absolute;
             top: 0;
@@ -114,16 +115,180 @@
             border-color: #3a2a1a;
             text-decoration: line-through;
         }
+
+        /* ========== 创建角色界面 ========== */
+        #create-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #create-screen.active {
+            display: flex;
+        }
+
+        .tentacle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .create-panel {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 32px 28px;
+            border: 2px solid #5a2020;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 4px;
+        }
+
+        .create-title {
+            font-size: 28px;
+            color: #c48b6b;
+            letter-spacing: 6px;
+            text-shadow: 0 0 8px rgba(180, 80, 60, 0.5);
+        }
+
+        .input-name {
+            width: 220px;
+            padding: 10px 14px;
+            font-size: 16px;
+            font-family: 'Courier New', 'SimSun', monospace;
+            color: #e8d5b7;
+            background: #0a0a0a;
+            border: 2px solid #5a2020;
+            outline: none;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        .input-name::placeholder {
+            color: #4a3030;
+            letter-spacing: 2px;
+        }
+
+        .input-name:focus {
+            border-color: #a04040;
+            box-shadow: 0 0 12px rgba(160, 60, 60, 0.3);
+        }
+
+        .upload-label {
+            padding: 10px 24px;
+            font-size: 14px;
+            font-family: 'Courier New', 'SimSun', monospace;
+            color: #c48b6b;
+            border: 2px dashed #5a2020;
+            cursor: pointer;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .upload-label:hover {
+            border-color: #a04040;
+            color: #d4a090;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .preview-container {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #5a2020;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .preview-placeholder {
+            color: #3a2020;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        .btn-confirm {
+            padding: 12px 40px;
+            font-size: 16px;
+            font-family: 'Courier New', 'SimSun', monospace;
+            color: #c48b6b;
+            background: transparent;
+            border: 2px solid #5a2020;
+            cursor: pointer;
+            letter-spacing: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm:hover {
+            border-color: #a04040;
+            color: #d4a090;
+            box-shadow: 0 0 12px rgba(160, 60, 60, 0.3);
+        }
+
+        .btn-confirm:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .file-name {
+            color: #6b3a2a;
+            font-size: 11px;
+            letter-spacing: 1px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
     <div class="game-container" id="game-container">
         
+        <!-- 封面 -->
         <div id="cover-screen">
             <canvas class="pixel-particles" id="particles-canvas"></canvas>
             <h1 class="cover-title">镜</h1>
             <button class="btn-start" id="btn-start">开 始 游 戏</button>
             <button class="btn-music" id="btn-music">🔇 点击开启音乐</button>
+        </div>
+
+        <!-- 创建角色界面 -->
+        <div id="create-screen">
+            <canvas class="tentacle-canvas" id="tentacle-canvas"></canvas>
+            <div class="create-panel">
+                <h2 class="create-title">创 建 角 色</h2>
+                <input type="text" class="input-name" id="input-name" placeholder="输入你的名字" maxlength="8">
+                <label class="upload-label" for="file-input">📁 上传形象 (PNG)</label>
+                <input type="file" id="file-input" accept="image/png">
+                <div class="preview-container" id="preview-container">
+                    <span class="preview-placeholder">预览</span>
+                </div>
+                <span class="file-name" id="file-name"></span>
+                <button class="btn-confirm" id="btn-confirm" disabled>确 认</button>
+            </div>
         </div>
 
     </div>
@@ -170,27 +335,26 @@
             }
         }, { once: false });
 
-        // ========== 像素蒸腾粒子 ==========
-        const canvas = document.getElementById('particles-canvas');
-        const ctx = canvas.getContext('2d');
+        // ========== 封面粒子 ==========
+        const particlesCanvas = document.getElementById('particles-canvas');
+        const particlesCtx = particlesCanvas.getContext('2d');
         const container = document.getElementById('game-container');
 
         let particles = [];
         const PARTICLE_COUNT = 80;
 
-        function resizeCanvas() {
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+        function resizeParticlesCanvas() {
+            particlesCanvas.width = container.clientWidth;
+            particlesCanvas.height = container.clientHeight;
         }
 
         class PixelParticle {
             constructor() {
                 this.reset();
             }
-
             reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 40;
+                this.x = Math.random() * particlesCanvas.width;
+                this.y = particlesCanvas.height + Math.random() * 40;
                 this.size = Math.random() < 0.7 ? 2 : 3;
                 this.speed = 0.3 + Math.random() * 0.8;
                 this.opacity = 0.3 + Math.random() * 0.7;
@@ -199,13 +363,11 @@
                 this.lifespan = 300 + Math.random() * 400;
                 this.age = 0;
             }
-
             update() {
                 this.age++;
                 this.y -= this.speed;
                 this.x += Math.sin(this.wobble) * 0.3;
                 this.wobble += this.wobbleSpeed;
-
                 const lifeRatio = this.age / this.lifespan;
                 if (lifeRatio < 0.2) {
                     this.currentOpacity = this.opacity * (lifeRatio / 0.2);
@@ -214,20 +376,13 @@
                 } else {
                     this.currentOpacity = this.opacity;
                 }
-
                 if (this.age >= this.lifespan || this.y < -10) {
                     this.reset();
                 }
             }
-
             draw(ctx) {
                 ctx.fillStyle = `rgba(220, 210, 190, ${this.currentOpacity})`;
-                ctx.fillRect(
-                    Math.floor(this.x),
-                    Math.floor(this.y),
-                    this.size,
-                    this.size
-                );
+                ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.size, this.size);
             }
         }
 
@@ -235,33 +390,232 @@
             particles = [];
             for (let i = 0; i < PARTICLE_COUNT; i++) {
                 const p = new PixelParticle();
-                p.y = Math.random() * canvas.height;
+                p.y = Math.random() * particlesCanvas.height;
                 p.age = Math.floor(Math.random() * p.lifespan);
                 particles.push(p);
             }
         }
 
         function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
             particles.forEach(p => {
                 p.update();
-                p.draw(ctx);
+                p.draw(particlesCtx);
             });
             requestAnimationFrame(animateParticles);
         }
 
-        resizeCanvas();
+        resizeParticlesCanvas();
         initParticles();
         animateParticles();
 
         window.addEventListener('resize', () => {
-            resizeCanvas();
+            resizeParticlesCanvas();
         });
 
-        // ========== 点击开始游戏 ==========
+        // ========== 触手背景 ==========
+        const tentacleCanvas = document.getElementById('tentacle-canvas');
+        const tentacleCtx = tentacleCanvas.getContext('2d');
+
+        function resizeTentacleCanvas() {
+            tentacleCanvas.width = container.clientWidth;
+            tentacleCanvas.height = container.clientHeight;
+        }
+
+        // 触手类 - 从底部伸出的像素触手
+        class Tentacle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                // 底部随机位置
+                this.baseX = Math.random() * tentacleCanvas.width;
+                this.baseY = tentacleCanvas.height;
+                // 触手高度
+                this.height = 60 + Math.random() * 200;
+                // 分段数量
+                this.segments = 8 + Math.floor(Math.random() * 15);
+                // 蠕动相位
+                this.phase = Math.random() * Math.PI * 2;
+                this.phaseSpeed = 0.02 + Math.random() * 0.04;
+                // 摆动幅度
+                this.amplitude = 8 + Math.random() * 25;
+                // 触手粗细
+                this.thickness = 2 + Math.random() * 4;
+                // 颜色 (暗红色系)
+                const redBase = 100 + Math.floor(Math.random() * 60);
+                this.color = `rgba(${redBase}, ${20 + Math.floor(Math.random() * 30)}, ${15 + Math.floor(Math.random() * 20)}, 0.85)`;
+                // 触手顶端偏暗
+                this.tipColor = `rgba(${redBase - 20}, 10, 5, 0.7)`;
+                // 生命周期后重置位置
+                this.lifespan = 400 + Math.random() * 600;
+                this.age = Math.floor(Math.random() * this.lifespan);
+            }
+
+            update() {
+                this.age++;
+                this.phase += this.phaseSpeed;
+                if (this.age >= this.lifespan) {
+                    this.reset();
+                }
+            }
+
+            draw(ctx) {
+                const points = [];
+                // 计算触手各节点位置
+                for (let i = 0; i <= this.segments; i++) {
+                    const t = i / this.segments;
+                    const xOffset = Math.sin(this.phase + t * 2.5) * this.amplitude * t;
+                    const xOffset2 = Math.cos(this.phase * 1.3 + t * 1.8) * this.amplitude * 0.4 * t;
+                    const px = this.baseX + xOffset + xOffset2;
+                    const py = this.baseY - this.height * t;
+                    points.push({ x: px, y: py, t: t });
+                }
+
+                // 绘制触手 - 分段画像素块
+                for (let i = 0; i < points.length - 1; i++) {
+                    const p1 = points[i];
+                    const p2 = points[i + 1];
+                    const t = p1.t;
+                    // 越往上越细
+                    const thickness = Math.ceil(this.thickness * (1 - t * 0.7));
+                    const alpha = 0.5 + 0.5 * (1 - t);
+
+                    // 颜色渐变
+                    const color = t > 0.7 ? this.tipColor : this.color;
+
+                    // 画粗像素段
+                    for (let dy = -thickness; dy <= thickness; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const sx = Math.floor(p1.x + dx);
+                            const sy = Math.floor(p1.y + dy);
+                            if (Math.random() > 0.15) {
+                                ctx.fillStyle = color;
+                                ctx.fillRect(sx, sy, 2, 2);
+                            }
+                        }
+                    }
+
+                    // 连接线段（像素化）
+                    const steps = Math.ceil(Math.abs(p2.y - p1.y) / 4);
+                    for (let s = 0; s < steps; s++) {
+                        const st = s / steps;
+                        const sx = Math.floor(p1.x + (p2.x - p1.x) * st);
+                        const sy = Math.floor(p1.y + (p2.y - p1.y) * st);
+                        const st2 = p1.t + (p2.t - p1.t) * st;
+                        const sthickness = Math.ceil(this.thickness * (1 - st2 * 0.7));
+                        for (let dy = -sthickness; dy <= sthickness; dy++) {
+                            if (Math.random() > 0.2) {
+                                ctx.fillStyle = color;
+                                ctx.fillRect(sx, sy + dy, 2, 2);
+                            }
+                        }
+                    }
+                }
+
+                // 触手顶端小触须
+                const tip = points[points.length - 1];
+                for (let i = 0; i < 3; i++) {
+                    const angle = this.phase + i * 2.1;
+                    const tx = Math.floor(tip.x + Math.cos(angle) * 6);
+                    const ty = Math.floor(tip.y + Math.sin(angle) * 6);
+                    ctx.fillStyle = this.tipColor;
+                    ctx.fillRect(tx, ty, 2, 2);
+                }
+            }
+        }
+
+        let tentacles = [];
+        const TENTACLE_COUNT = 12;
+
+        function initTentacles() {
+            tentacles = [];
+            for (let i = 0; i < TENTACLE_COUNT; i++) {
+                const t = new Tentacle();
+                t.age = Math.floor(Math.random() * t.lifespan);
+                tentacles.push(t);
+            }
+        }
+
+        function animateTentacles() {
+            tentacleCtx.clearRect(0, 0, tentacleCanvas.width, tentacleCanvas.height);
+            tentacles.forEach(t => {
+                t.update();
+                t.draw(tentacleCtx);
+            });
+            requestAnimationFrame(animateTentacles);
+        }
+
+        resizeTentacleCanvas();
+        initTentacles();
+        animateTentacles();
+
+        window.addEventListener('resize', () => {
+            resizeTentacleCanvas();
+        });
+
+        // ========== 界面切换 ==========
+        const coverScreen = document.getElementById('cover-screen');
+        const createScreen = document.getElementById('create-screen');
+        const inputName = document.getElementById('input-name');
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('preview-container');
+        const fileNameDisplay = document.getElementById('file-name');
+        const btnConfirm = document.getElementById('btn-confirm');
+
+        let playerName = '';
+        let playerImage = null;
+
+        // 点击开始游戏 → 切换到创建角色界面
         document.getElementById('btn-start').addEventListener('click', () => {
-            document.getElementById('cover-screen').style.display = 'none';
-            console.log('进入创建角色阶段');
+            coverScreen.style.display = 'none';
+            createScreen.classList.add('active');
+            resizeTentacleCanvas();
+        });
+
+        // 名字输入
+        inputName.addEventListener('input', () => {
+            playerName = inputName.value.trim();
+            checkConfirmReady();
+        });
+
+        // 文件上传
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/png') {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    playerImage = ev.target.result;
+                    previewContainer.innerHTML = `<img src="${playerImage}" alt="形象预览">`;
+                    fileNameDisplay.textContent = file.name;
+                    checkConfirmReady();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '<span class="preview-placeholder">预览</span>';
+                fileNameDisplay.textContent = '';
+                playerImage = null;
+                checkConfirmReady();
+            }
+        });
+
+        function checkConfirmReady() {
+            if (playerName.length > 0 && playerImage) {
+                btnConfirm.disabled = false;
+            } else {
+                btnConfirm.disabled = true;
+            }
+        }
+
+        // 确认按钮
+        btnConfirm.addEventListener('click', () => {
+            if (!playerName || !playerImage) return;
+            console.log('玩家名字:', playerName);
+            console.log('形象数据已就绪');
+            // 后续进入游戏场景
+            createScreen.classList.remove('active');
+            // TODO: 进入祭坛场景
         });
     </script>
 </body>
