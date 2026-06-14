@@ -78,6 +78,7 @@
             z-index: 1;
             transition: all 0.3s ease;
             text-shadow: 0 0 8px rgba(232, 213, 183, 0.5);
+            margin-bottom: 20px;
         }
 
         .btn-start:hover {
@@ -89,6 +90,30 @@
         .btn-start:active {
             transform: scale(0.95);
         }
+
+        .btn-music {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-family: 'Courier New', 'SimSun', monospace;
+            color: #8a7a6a;
+            background: transparent;
+            border: 2px solid #4a3a2a;
+            cursor: pointer;
+            letter-spacing: 3px;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .btn-music:hover {
+            color: #e8d5b7;
+            border-color: #6b5a4a;
+        }
+
+        .btn-music.muted {
+            color: #5a4a3a;
+            border-color: #3a2a1a;
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body>
@@ -98,11 +123,54 @@
             <canvas class="pixel-particles" id="particles-canvas"></canvas>
             <h1 class="cover-title">镜</h1>
             <button class="btn-start" id="btn-start">开 始 游 戏</button>
+            <button class="btn-music" id="btn-music">🔇 点击开启音乐</button>
         </div>
 
     </div>
 
+    <audio id="bgm" loop preload="auto">
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
+        // ========== 背景音乐控制 ==========
+        const bgm = document.getElementById('bgm');
+        const btnMusic = document.getElementById('btn-music');
+        let musicStarted = false;
+
+        btnMusic.addEventListener('click', () => {
+            if (!musicStarted) {
+                bgm.play().then(() => {
+                    musicStarted = true;
+                    btnMusic.textContent = '♪ 音乐：开';
+                    btnMusic.classList.remove('muted');
+                }).catch(err => {
+                    console.log('播放失败:', err);
+                });
+            } else {
+                if (bgm.paused) {
+                    bgm.play();
+                    btnMusic.textContent = '♪ 音乐：开';
+                    btnMusic.classList.remove('muted');
+                } else {
+                    bgm.pause();
+                    btnMusic.textContent = '🔇 音乐：关';
+                    btnMusic.classList.add('muted');
+                }
+            }
+        });
+
+        document.addEventListener('click', function tryPlayMusic() {
+            if (!musicStarted) {
+                bgm.play().then(() => {
+                    musicStarted = true;
+                    btnMusic.textContent = '♪ 音乐：开';
+                    btnMusic.classList.remove('muted');
+                }).catch(() => {});
+            }
+        }, { once: false });
+
+        // ========== 像素蒸腾粒子 ==========
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('game-container');
@@ -190,6 +258,7 @@
             resizeCanvas();
         });
 
+        // ========== 点击开始游戏 ==========
         document.getElementById('btn-start').addEventListener('click', () => {
             document.getElementById('cover-screen').style.display = 'none';
             console.log('进入创建角色阶段');
