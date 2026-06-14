@@ -20,6 +20,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .game-container {
@@ -31,6 +35,7 @@
             overflow: hidden;
         }
 
+        /* ========== 封面 ========== */
         #cover-screen {
             position: absolute;
             top: 0;
@@ -57,10 +62,7 @@
             font-size: 64px;
             color: #e8d5b7;
             letter-spacing: 12px;
-            text-shadow:
-                0 0 10px rgba(232, 213, 183, 0.6),
-                0 0 30px rgba(232, 213, 183, 0.3),
-                2px 2px 0 #3a2a1a;
+            text-shadow: 0 0 10px rgba(232, 213, 183, 0.6), 0 0 30px rgba(232, 213, 183, 0.3), 2px 2px 0 #3a2a1a;
             margin-bottom: 60px;
             z-index: 1;
         }
@@ -74,7 +76,6 @@
             border: 3px solid #6b5a4a;
             cursor: pointer;
             letter-spacing: 6px;
-            position: relative;
             z-index: 1;
             transition: all 0.3s ease;
             text-shadow: 0 0 8px rgba(232, 213, 183, 0.5);
@@ -86,10 +87,7 @@
             border-color: #e8d5b7;
             box-shadow: 0 0 20px rgba(232, 213, 183, 0.2);
         }
-
-        .btn-start:active {
-            transform: scale(0.95);
-        }
+        .btn-start:active { transform: scale(0.95); }
 
         .btn-music {
             padding: 10px 20px;
@@ -103,18 +101,10 @@
             z-index: 1;
             transition: all 0.3s ease;
         }
+        .btn-music:hover { color: #e8d5b7; border-color: #6b5a4a; }
+        .btn-music.muted { color: #5a4a3a; border-color: #3a2a1a; text-decoration: line-through; }
 
-        .btn-music:hover {
-            color: #e8d5b7;
-            border-color: #6b5a4a;
-        }
-
-        .btn-music.muted {
-            color: #5a4a3a;
-            border-color: #3a2a1a;
-            text-decoration: line-through;
-        }
-
+        /* ========== 创建角色界面 ========== */
         #create-screen {
             position: absolute;
             top: 0;
@@ -128,10 +118,7 @@
             z-index: 10;
             padding-top: 80px;
         }
-
-        #create-screen.active {
-            display: flex;
-        }
+        #create-screen.active { display: flex; }
 
         .eye-canvas {
             position: absolute;
@@ -174,16 +161,8 @@
             text-align: center;
             letter-spacing: 3px;
         }
-
-        .input-name::placeholder {
-            color: #4a3030;
-            letter-spacing: 2px;
-        }
-
-        .input-name:focus {
-            border-color: #a04040;
-            box-shadow: 0 0 12px rgba(160, 60, 60, 0.3);
-        }
+        .input-name::placeholder { color: #4a3030; letter-spacing: 2px; }
+        .input-name:focus { border-color: #a04040; box-shadow: 0 0 12px rgba(160, 60, 60, 0.3); }
 
         .upload-label {
             padding: 10px 24px;
@@ -196,15 +175,9 @@
             transition: all 0.3s ease;
             text-align: center;
         }
+        .upload-label:hover { border-color: #a04040; color: #d4a090; }
 
-        .upload-label:hover {
-            border-color: #a04040;
-            color: #d4a090;
-        }
-
-        #file-input {
-            display: none;
-        }
+        #file-input { display: none; }
 
         .preview-container {
             width: 80px;
@@ -216,18 +189,8 @@
             overflow: hidden;
             background: #0a0a0a;
         }
-
-        .preview-container img {
-            max-width: 100%;
-            max-height: 100%;
-            image-rendering: pixelated;
-        }
-
-        .preview-placeholder {
-            color: #3a2020;
-            font-size: 12px;
-            letter-spacing: 2px;
-        }
+        .preview-container img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
+        .preview-placeholder { color: #3a2020; font-size: 12px; letter-spacing: 2px; }
 
         .btn-confirm {
             padding: 12px 40px;
@@ -240,32 +203,141 @@
             letter-spacing: 4px;
             transition: all 0.3s ease;
         }
+        .btn-confirm:hover { border-color: #a04040; color: #d4a090; box-shadow: 0 0 12px rgba(160, 60, 60, 0.3); }
+        .btn-confirm:disabled { opacity: 0.3; cursor: not-allowed; }
+        .file-name { color: #6b3a2a; font-size: 11px; letter-spacing: 1px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        .btn-confirm:hover {
-            border-color: #a04040;
-            color: #d4a090;
-            box-shadow: 0 0 12px rgba(160, 60, 60, 0.3);
+        /* ========== 游戏场景 ========== */
+        #game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 5;
+        }
+        #game-screen.active { display: block; }
+
+        .game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
-        .btn-confirm:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
+        /* 虚拟摇杆 */
+        .joystick-area {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 130px;
+            height: 130px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid rgba(200, 170, 140, 0.4);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .joystick-thumb {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(200, 170, 140, 0.5);
+            border: 2px solid rgba(200, 170, 140, 0.7);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: none;
         }
 
-        .file-name {
-            color: #6b3a2a;
+        /* 交互按钮 */
+        .btn-interact {
+            position: absolute;
+            bottom: 60px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid rgba(200, 170, 140, 0.6);
+            background: rgba(0, 0, 0, 0.4);
+            color: #c8aa8c;
+            font-size: 14px;
+            font-family: 'Courier New', 'SimSun', monospace;
+            letter-spacing: 2px;
+            z-index: 20;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .btn-interact:active {
+            background: rgba(200, 170, 140, 0.3);
+            border-color: rgba(240, 200, 160, 0.9);
+        }
+        .btn-interact.glow {
+            border-color: rgba(240, 200, 160, 0.9);
+            box-shadow: 0 0 20px rgba(200, 150, 100, 0.5);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(200, 150, 100, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(200, 150, 100, 0.7); }
+        }
+
+        /* 对话框 */
+        .dialog-box {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #5a3a2a;
+            padding: 20px;
+            z-index: 25;
+            display: none;
+            border-radius: 4px;
+        }
+        .dialog-box.active { display: block; }
+        .dialog-speaker {
+            color: #c48b6b;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        .dialog-text {
+            color: #d4c0a8;
+            font-size: 15px;
+            letter-spacing: 2px;
+            line-height: 1.8;
+            min-height: 40px;
+        }
+        .dialog-hint {
+            color: #6b4a3a;
             font-size: 11px;
-            letter-spacing: 1px;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            text-align: right;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
 <body>
     <div class="game-container" id="game-container">
         
+        <!-- 封面 -->
         <div id="cover-screen">
             <canvas class="pixel-particles" id="particles-canvas"></canvas>
             <h1 class="cover-title">镜</h1>
@@ -273,6 +345,7 @@
             <button class="btn-music" id="btn-music">🔇 点击开启音乐</button>
         </div>
 
+        <!-- 创建角色 -->
         <div id="create-screen">
             <canvas class="eye-canvas" id="eye-canvas"></canvas>
             <div class="create-panel">
@@ -288,6 +361,24 @@
             </div>
         </div>
 
+        <!-- 游戏场景 -->
+        <div id="game-screen">
+            <canvas class="game-canvas" id="game-canvas"></canvas>
+            
+            <div class="joystick-area" id="joystick-area">
+                <div class="joystick-base"></div>
+                <div class="joystick-thumb" id="joystick-thumb"></div>
+            </div>
+            
+            <button class="btn-interact" id="btn-interact">交 互</button>
+
+            <div class="dialog-box" id="dialog-box">
+                <div class="dialog-speaker" id="dialog-speaker"></div>
+                <div class="dialog-text" id="dialog-text"></div>
+                <div class="dialog-hint">▼ 点击继续</div>
+            </div>
+        </div>
+
     </div>
 
     <audio id="bgm" loop preload="auto">
@@ -295,6 +386,13 @@
     </audio>
 
     <script>
+        // ========== 全局状态 ==========
+        const container = document.getElementById('game-container');
+        let playerName = '';
+        let playerImage = null;
+        let playerImgObj = new Image();
+
+        // ========== BGM ==========
         const bgm = document.getElementById('bgm');
         const btnMusic = document.getElementById('btn-music');
         let musicStarted = false;
@@ -305,48 +403,23 @@
                     musicStarted = true;
                     btnMusic.textContent = '♪ 音乐：开';
                     btnMusic.classList.remove('muted');
-                }).catch(err => {
-                    console.log('播放失败:', err);
-                });
+                }).catch(() => {});
             } else {
-                if (bgm.paused) {
-                    bgm.play();
-                    btnMusic.textContent = '♪ 音乐：开';
-                    btnMusic.classList.remove('muted');
-                } else {
-                    bgm.pause();
-                    btnMusic.textContent = '🔇 音乐：关';
-                    btnMusic.classList.add('muted');
-                }
+                if (bgm.paused) { bgm.play(); btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); }
+                else { bgm.pause(); btnMusic.textContent = '🔇 音乐：关'; btnMusic.classList.add('muted'); }
             }
         });
-
-        document.addEventListener('click', function tryPlayMusic() {
-            if (!musicStarted) {
-                bgm.play().then(() => {
-                    musicStarted = true;
-                    btnMusic.textContent = '♪ 音乐：开';
-                    btnMusic.classList.remove('muted');
-                }).catch(() => {});
-            }
+        document.addEventListener('click', function tryPlay() {
+            if (!musicStarted) bgm.play().then(() => { musicStarted = true; btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); }).catch(() => {});
         }, { once: false });
 
+        // ========== 封面粒子 ==========
         const particlesCanvas = document.getElementById('particles-canvas');
         const particlesCtx = particlesCanvas.getContext('2d');
-        const container = document.getElementById('game-container');
-
         let particles = [];
-        const PARTICLE_COUNT = 80;
-
-        function resizeParticlesCanvas() {
-            particlesCanvas.width = container.clientWidth;
-            particlesCanvas.height = container.clientHeight;
-        }
-
+        function resizeParticlesCanvas() { particlesCanvas.width = container.clientWidth; particlesCanvas.height = container.clientHeight; }
         class PixelParticle {
-            constructor() {
-                this.reset();
-            }
+            constructor() { this.reset(); }
             reset() {
                 this.x = Math.random() * particlesCanvas.width;
                 this.y = particlesCanvas.height + Math.random() * 40;
@@ -359,268 +432,124 @@
                 this.age = 0;
             }
             update() {
-                this.age++;
-                this.y -= this.speed;
-                this.x += Math.sin(this.wobble) * 0.3;
-                this.wobble += this.wobbleSpeed;
-                const lifeRatio = this.age / this.lifespan;
-                if (lifeRatio < 0.2) {
-                    this.currentOpacity = this.opacity * (lifeRatio / 0.2);
-                } else if (lifeRatio > 0.8) {
-                    this.currentOpacity = this.opacity * ((1 - lifeRatio) / 0.2);
-                } else {
-                    this.currentOpacity = this.opacity;
-                }
-                if (this.age >= this.lifespan || this.y < -10) {
-                    this.reset();
-                }
+                this.age++; this.y -= this.speed; this.x += Math.sin(this.wobble) * 0.3; this.wobble += this.wobbleSpeed;
+                const lr = this.age / this.lifespan;
+                this.currentOpacity = lr < 0.2 ? this.opacity * (lr / 0.2) : lr > 0.8 ? this.opacity * ((1 - lr) / 0.2) : this.opacity;
+                if (this.age >= this.lifespan || this.y < -10) this.reset();
             }
             draw(ctx) {
                 ctx.fillStyle = `rgba(220, 210, 190, ${this.currentOpacity})`;
                 ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.size, this.size);
             }
         }
-
-        function initParticles() {
-            particles = [];
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                const p = new PixelParticle();
-                p.y = Math.random() * particlesCanvas.height;
-                p.age = Math.floor(Math.random() * p.lifespan);
-                particles.push(p);
-            }
-        }
-
-        function animateParticles() {
-            particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw(particlesCtx);
-            });
-            requestAnimationFrame(animateParticles);
-        }
-
-        resizeParticlesCanvas();
-        initParticles();
-        animateParticles();
-
-        window.addEventListener('resize', () => {
-            resizeParticlesCanvas();
-        });
+        function initParticles() { particles = []; for (let i = 0; i < 80; i++) { const p = new PixelParticle(); p.y = Math.random() * particlesCanvas.height; p.age = Math.floor(Math.random() * p.lifespan); particles.push(p); } }
+        function animateParticles() { particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height); particles.forEach(p => { p.update(); p.draw(particlesCtx); }); requestAnimationFrame(animateParticles); }
+        resizeParticlesCanvas(); initParticles(); animateParticles();
+        window.addEventListener('resize', resizeParticlesCanvas);
 
         // ========== 眼睛背景 ==========
         const eyeCanvas = document.getElementById('eye-canvas');
         const eyeCtx = eyeCanvas.getContext('2d');
-
-        function resizeEyeCanvas() {
-            eyeCanvas.width = container.clientWidth;
-            eyeCanvas.height = container.clientHeight;
-        }
-
+        let eyes = [];
+        function resizeEyeCanvas() { eyeCanvas.width = container.clientWidth; eyeCanvas.height = container.clientHeight; }
         class FloatingEye {
-            constructor(forceBottom) {
-                this.forceBottom = forceBottom;
-                this.reset();
-            }
-
-            reset() {
-                // 如果标记为底部眼睛，则 y 范围在画面下半部分
-                if (this.forceBottom) {
-                    this.x = 10 + Math.random() * (eyeCanvas.width - 20);
-                    this.y = eyeCanvas.height * 0.55 + Math.random() * (eyeCanvas.height * 0.45 - 20);
-                } else {
-                    this.x = 10 + Math.random() * (eyeCanvas.width - 20);
-                    this.y = 10 + Math.random() * (eyeCanvas.height - 20);
-                }
-                this.size = 16 + Math.random() * 40;
+            constructor(x, y) {
+                this.originX = x; this.originY = y; this.x = x; this.y = y;
+                this.size = 18 + Math.random() * 35;
                 this.blinkInterval = 100 + Math.random() * 250;
                 this.blinkTimer = Math.floor(Math.random() * this.blinkInterval);
-                this.isBlinking = false;
-                this.blinkProgress = 0;
+                this.isBlinking = false; this.blinkProgress = 0;
                 this.blinkSpeed = 0.05 + Math.random() * 0.1;
                 this.floatPhase = Math.random() * Math.PI * 2;
                 this.floatSpeed = 0.005 + Math.random() * 0.015;
                 this.floatRange = 3 + Math.random() * 8;
-                this.originX = this.x;
-                this.originY = this.y;
                 this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.2;
                 this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.2;
-                const redVal = 130 + Math.floor(Math.random() * 70);
-                this.irisColor = `rgba(${redVal}, ${15 + Math.floor(Math.random() * 25)}, ${10 + Math.floor(Math.random() * 20)}, 0.85)`;
+                const rv = 130 + Math.floor(Math.random() * 70);
+                this.irisColor = `rgba(${rv}, ${15+Math.floor(Math.random()*25)}, ${10+Math.floor(Math.random()*20)}, 0.85)`;
                 this.pupilColor = '#0a0000';
             }
-
             update() {
                 this.floatPhase += this.floatSpeed;
                 this.x = this.originX + Math.sin(this.floatPhase) * this.floatRange;
                 this.y = this.originY + Math.cos(this.floatPhase * 1.3) * this.floatRange * 0.6;
-
                 this.blinkTimer++;
-                if (this.blinkTimer >= this.blinkInterval) {
-                    this.isBlinking = true;
-                    this.blinkTimer = 0;
-                    this.blinkInterval = 80 + Math.random() * 280;
-                }
-
-                if (this.isBlinking) {
-                    this.blinkProgress += this.blinkSpeed;
-                    if (this.blinkProgress >= 1) {
-                        this.blinkProgress = 1;
-                        this.isBlinking = false;
-                    }
-                } else {
-                    if (this.blinkProgress > 0) {
-                        this.blinkProgress -= this.blinkSpeed;
-                        if (this.blinkProgress < 0) this.blinkProgress = 0;
-                    }
-                }
-
-                if (Math.random() < 0.003) {
-                    this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.3;
-                    this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.3;
-                }
+                if (this.blinkTimer >= this.blinkInterval) { this.isBlinking = true; this.blinkTimer = 0; this.blinkInterval = 80 + Math.random() * 280; }
+                if (this.isBlinking) { this.blinkProgress += this.blinkSpeed; if (this.blinkProgress >= 1) { this.blinkProgress = 1; this.isBlinking = false; } }
+                else if (this.blinkProgress > 0) { this.blinkProgress -= this.blinkSpeed; if (this.blinkProgress < 0) this.blinkProgress = 0; }
+                if (Math.random() < 0.003) { this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.3; this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.3; }
             }
-
             draw(ctx) {
-                const cx = Math.floor(this.x);
-                const cy = Math.floor(this.y);
-                const s = Math.floor(this.size);
-                const halfS = Math.floor(s / 2);
+                const cx = Math.floor(this.x), cy = Math.floor(this.y), s = Math.floor(this.size), halfS = Math.floor(s / 2);
                 const blinkRatio = this.blinkProgress;
-
-                const eyeHeight = Math.floor(halfS * 1.3 * (1 - blinkRatio));
-                const eyeWidth = Math.floor(halfS * 1.4);
-
-                if (eyeHeight <= 0) return;
-
-                // 眼白
-                for (let dy = -eyeHeight; dy <= eyeHeight; dy += 2) {
-                    const ratio = Math.abs(dy) / eyeHeight;
-                    const rowWidth = Math.floor(eyeWidth * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                    for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
-                        const px = cx + dx;
-                        const py = cy + dy;
-                        const edgeDist = Math.abs(dx) / (rowWidth || 1);
-                        const alpha = 0.35 + 0.25 * (1 - edgeDist);
-                        ctx.fillStyle = `rgba(190, 170, 155, ${alpha})`;
-                        ctx.fillRect(px, py, 2, 2);
+                const eh = Math.floor(halfS * 1.3 * (1 - blinkRatio)), ew = Math.floor(halfS * 1.4);
+                if (eh <= 0) return;
+                for (let dy = -eh; dy <= eh; dy += 2) {
+                    const ratio = Math.abs(dy) / eh, rw = Math.floor(ew * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                    for (let dx = -rw; dx <= rw; dx += 2) {
+                        const ed = Math.abs(dx) / (rw || 1), alpha = 0.35 + 0.25 * (1 - ed);
+                        ctx.fillStyle = `rgba(190, 170, 155, ${alpha})`; ctx.fillRect(cx + dx, cy + dy, 2, 2);
                     }
                 }
-
-                // 虹膜
-                const irisR = Math.floor(halfS * 0.55);
-                const irisHeight = Math.floor(irisR * (1 - blinkRatio));
-                if (irisHeight > 0) {
-                    for (let dy = -irisHeight; dy <= irisHeight; dy += 2) {
-                        const ratio = Math.abs(dy) / irisHeight;
-                        const rowWidth = Math.floor(irisR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                        for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
-                            ctx.fillStyle = this.irisColor;
-                            ctx.fillRect(cx + dx, cy + dy, 2, 2);
+                const irisR = Math.floor(halfS * 0.55), irisH = Math.floor(irisR * (1 - blinkRatio));
+                if (irisH > 0) {
+                    for (let dy = -irisH; dy <= irisH; dy += 2) {
+                        const ratio = Math.abs(dy) / irisH, rw = Math.floor(irisR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                        for (let dx = -rw; dx <= rw; dx += 2) { ctx.fillStyle = this.irisColor; ctx.fillRect(cx + dx, cy + dy, 2, 2); }
+                    }
+                    const pupilR = Math.floor(irisR * 0.45), px = Math.floor(cx + this.pupilOffsetX * (1 - blinkRatio)), py = Math.floor(cy + this.pupilOffsetY * (1 - blinkRatio));
+                    const ph = Math.floor(pupilR * (1 - blinkRatio));
+                    if (ph > 0) {
+                        for (let dy = -ph; dy <= ph; dy += 2) {
+                            const ratio = Math.abs(dy) / ph, rw = Math.floor(pupilR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                            for (let dx = -rw; dx <= rw; dx += 2) { ctx.fillStyle = this.pupilColor; ctx.fillRect(px + dx, py + dy, 2, 2); }
                         }
                     }
-
-                    // 瞳孔
-                    const pupilR = Math.floor(irisR * 0.45);
-                    const px = Math.floor(cx + this.pupilOffsetX * (1 - blinkRatio));
-                    const py = Math.floor(cy + this.pupilOffsetY * (1 - blinkRatio));
-                    const pupilHeight = Math.floor(pupilR * (1 - blinkRatio));
-                    if (pupilHeight > 0) {
-                        for (let dy = -pupilHeight; dy <= pupilHeight; dy += 2) {
-                            const ratio = Math.abs(dy) / pupilHeight;
-                            const rowWidth = Math.floor(pupilR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                            for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
-                                ctx.fillStyle = this.pupilColor;
-                                ctx.fillRect(px + dx, py + dy, 2, 2);
-                            }
-                        }
-                    }
-
-                    // 高光
-                    const highlightR = Math.floor(pupilR * 0.4);
-                    const hx = cx - Math.floor(irisR * 0.25);
-                    const hy = cy - Math.floor(irisR * 0.2);
-                    const hlHeight = Math.floor(highlightR * (1 - blinkRatio));
-                    if (hlHeight > 0) {
-                        for (let dy = -hlHeight; dy <= hlHeight; dy += 2) {
-                            const ratio = Math.abs(dy) / hlHeight;
-                            const rowWidth = Math.floor(highlightR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                            for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
-                                if (Math.random() > 0.4) {
-                                    ctx.fillStyle = 'rgba(255, 240, 230, 0.7)';
-                                    ctx.fillRect(hx + dx, hy + dy, 2, 2);
-                                }
-                            }
+                    const hlR = Math.floor(pupilR * 0.4), hx = cx - Math.floor(irisR * 0.25), hy = cy - Math.floor(irisR * 0.2);
+                    const hlH = Math.floor(hlR * (1 - blinkRatio));
+                    if (hlH > 0) {
+                        for (let dy = -hlH; dy <= hlH; dy += 2) {
+                            const ratio = Math.abs(dy) / hlH, rw = Math.floor(hlR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                            for (let dx = -rw; dx <= rw; dx += 2) { if (Math.random() > 0.4) { ctx.fillStyle = 'rgba(255, 240, 230, 0.7)'; ctx.fillRect(hx + dx, hy + dy, 2, 2); } }
                         }
                     }
                 }
-
-                if (blinkRatio < 0.9) {
-                    ctx.strokeStyle = 'rgba(100, 50, 40, 0.5)';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.ellipse(cx, cy, eyeWidth, eyeHeight, 0, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
+                if (blinkRatio < 0.9) { ctx.strokeStyle = 'rgba(100, 50, 40, 0.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy, ew, eh, 0, 0, Math.PI * 2); ctx.stroke(); }
             }
         }
-
-        let eyes = [];
-        const TOP_EYE_COUNT = 6;
-        const BOTTOM_EYE_COUNT = 7;
-
         function initEyes() {
             eyes = [];
-            // 上半部分的自由分布眼睛
-            for (let i = 0; i < TOP_EYE_COUNT; i++) {
-                eyes.push(new FloatingEye(false));
-            }
-            // 底部强制分布在画面下半部分
-            for (let i = 0; i < BOTTOM_EYE_COUNT; i++) {
-                eyes.push(new FloatingEye(true));
-            }
+            const w = eyeCanvas.width || 480, h = eyeCanvas.height || 800;
+            const positions = [
+                { x: w * 0.08, y: h * 0.06 }, { x: w * 0.22, y: h * 0.04 }, { x: w * 0.75, y: h * 0.05 },
+                { x: w * 0.92, y: h * 0.08 }, { x: w * 0.05, y: h * 0.30 }, { x: w * 0.88, y: h * 0.28 },
+                { x: w * 0.10, y: h * 0.70 }, { x: w * 0.03, y: h * 0.90 }, { x: w * 0.85, y: h * 0.72 },
+                { x: w * 0.93, y: h * 0.88 }, { x: w * 0.70, y: h * 0.92 }, { x: w * 0.45, y: h * 0.95 },
+                { x: w * 0.50, y: h * 0.03 },
+            ];
+            positions.forEach(pos => eyes.push(new FloatingEye(pos.x, pos.y)));
         }
-
-        function animateEyes() {
-            eyeCtx.clearRect(0, 0, eyeCanvas.width, eyeCanvas.height);
-            eyes.forEach(eye => {
-                eye.update();
-                eye.draw(eyeCtx);
-            });
-            requestAnimationFrame(animateEyes);
-        }
-
-        resizeEyeCanvas();
-        initEyes();
-        animateEyes();
-
-        window.addEventListener('resize', () => {
-            resizeEyeCanvas();
-        });
+        function animateEyes() { eyeCtx.clearRect(0, 0, eyeCanvas.width, eyeCanvas.height); eyes.forEach(e => { e.update(); e.draw(eyeCtx); }); requestAnimationFrame(animateEyes); }
+        resizeEyeCanvas(); initEyes(); animateEyes();
+        window.addEventListener('resize', () => { resizeEyeCanvas(); initEyes(); });
 
         // ========== 界面切换 ==========
         const coverScreen = document.getElementById('cover-screen');
         const createScreen = document.getElementById('create-screen');
+        const gameScreen = document.getElementById('game-screen');
         const inputName = document.getElementById('input-name');
         const fileInput = document.getElementById('file-input');
         const previewContainer = document.getElementById('preview-container');
         const fileNameDisplay = document.getElementById('file-name');
         const btnConfirm = document.getElementById('btn-confirm');
 
-        let playerName = '';
-        let playerImage = null;
-
         document.getElementById('btn-start').addEventListener('click', () => {
             coverScreen.style.display = 'none';
             createScreen.classList.add('active');
-            resizeEyeCanvas();
+            resizeEyeCanvas(); initEyes();
         });
 
-        inputName.addEventListener('input', () => {
-            playerName = inputName.value.trim();
-            checkConfirmReady();
-        });
-
+        inputName.addEventListener('input', () => { playerName = inputName.value.trim(); checkConfirmReady(); });
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file && file.type === 'image/png') {
@@ -634,25 +563,341 @@
                 reader.readAsDataURL(file);
             } else {
                 previewContainer.innerHTML = '<span class="preview-placeholder">预览</span>';
-                fileNameDisplay.textContent = '';
-                playerImage = null;
-                checkConfirmReady();
+                fileNameDisplay.textContent = ''; playerImage = null; checkConfirmReady();
             }
         });
-
-        function checkConfirmReady() {
-            if (playerName.length > 0 && playerImage) {
-                btnConfirm.disabled = false;
-            } else {
-                btnConfirm.disabled = true;
-            }
-        }
+        function checkConfirmReady() { btnConfirm.disabled = !(playerName.length > 0 && playerImage); }
 
         btnConfirm.addEventListener('click', () => {
             if (!playerName || !playerImage) return;
-            console.log('玩家名字:', playerName);
-            console.log('形象数据已就绪');
+            playerImgObj.src = playerImage;
             createScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            initGameScene();
+        });
+
+        // ========== 游戏场景 ==========
+        const gameCanvas = document.getElementById('game-canvas');
+        const gameCtx = gameCanvas.getContext('2d');
+        const btnInteract = document.getElementById('btn-interact');
+        const dialogBox = document.getElementById('dialog-box');
+        const dialogSpeaker = document.getElementById('dialog-speaker');
+        const dialogText = document.getElementById('dialog-text');
+
+        let gameW, gameH;
+
+        // 玩家
+        let player = { x: 0, y: 0, width: 32, height: 32, speed: 2 };
+        // 祭坛位置（画面中央偏上）
+        let altar = { x: 0, y: 0, width: 120, height: 60 };
+        // 主神（火焰）位置（画面中央偏下）
+        let god = { x: 0, y: 0, radius: 40 };
+        // 移动输入
+        let inputDir = { x: 0, y: 0 };
+        // 对话状态
+        let inDialog = false;
+        let dialogIndex = 0;
+        const godDialogues = [
+            { speaker: '🔥 主神', text: '你终于来了，' + playerName + '。' },
+            { speaker: '🔥 主神', text: '我已在此等候多时……' },
+            { speaker: '🔥 主神', text: '在继续之前，告诉我你所携带的信物。' },
+            { speaker: '🔥 主神', text: '它们将决定你前行的道路。' },
+        ];
+
+        function resizeGameCanvas() {
+            gameW = container.clientWidth;
+            gameH = container.clientHeight;
+            gameCanvas.width = gameW;
+            gameCanvas.height = gameH;
+            // 祭坛位置
+            altar.x = gameW / 2 - altar.width / 2;
+            altar.y = gameH * 0.25;
+            // 主神位置
+            god.x = gameW / 2;
+            god.y = gameH * 0.68;
+            // 玩家初始位置（祭坛上）
+            player.x = altar.x + altar.width / 2 - player.width / 2;
+            player.y = altar.y - player.height;
+        }
+
+        function initGameScene() {
+            resizeGameCanvas();
+            dialogIndex = 0;
+            inDialog = false;
+            dialogBox.classList.remove('active');
+            btnInteract.classList.remove('glow');
+            gameLoop();
+        }
+
+        // ========== 波浪暗潮背景 ==========
+        let waveTime = 0;
+        function drawWaveBackground(ctx, w, h) {
+            // 用多个波浪叠加产生明暗渐变
+            for (let y = 0; y < h; y += 3) {
+                const wave1 = Math.sin(y * 0.02 + waveTime) * 0.5 + 0.5;
+                const wave2 = Math.cos(y * 0.035 + waveTime * 0.7) * 0.3 + 0.5;
+                const wave3 = Math.sin(y * 0.015 - waveTime * 1.3) * 0.4 + 0.5;
+                const brightness = (wave1 * 0.5 + wave2 * 0.3 + wave3 * 0.2);
+                const alpha = 0.03 + brightness * 0.06;
+                ctx.fillStyle = `rgba(180, 160, 140, ${alpha})`;
+                ctx.fillRect(0, y, w, 3);
+            }
+            waveTime += 0.015;
+        }
+
+        // ========== 像素祭坛 ==========
+        function drawAltar(ctx, x, y, w, h) {
+            // 底座
+            ctx.fillStyle = '#3a3a3a';
+            ctx.fillRect(x - 5, y + h - 8, w + 10, 12);
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(x - 3, y + h - 4, w + 6, 8);
+            // 主体
+            ctx.fillStyle = '#555555';
+            ctx.fillRect(x, y, w, h);
+            // 石纹
+            ctx.fillStyle = '#4a4a4a';
+            for (let i = 0; i < 8; i++) {
+                const rx = x + 8 + Math.floor(Math.random() * (w - 16));
+                const ry = y + 4 + Math.floor(Math.random() * (h - 8));
+                ctx.fillRect(rx, ry, 6, 3);
+            }
+            // 顶部
+            ctx.fillStyle = '#666666';
+            ctx.fillRect(x - 6, y - 4, w + 12, 8);
+            // 发光符文
+            ctx.fillStyle = 'rgba(200, 150, 80, 0.7)';
+            ctx.fillRect(x + w / 2 - 8, y + h / 2 - 4, 16, 8);
+            ctx.fillStyle = 'rgba(220, 180, 100, 0.9)';
+            ctx.fillRect(x + w / 2 - 4, y + h / 2 - 2, 8, 4);
+            // 边框
+            ctx.strokeStyle = '#5a5a5a';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, w, h);
+        }
+
+        // ========== 像素火焰主神 ==========
+        function drawGodFlame(ctx, cx, cy, r) {
+            const time = Date.now() * 0.003;
+            // 外层光晕
+            for (let i = 0; i < 30; i++) {
+                const angle = (i / 30) * Math.PI * 2 + time * 0.5;
+                const dist = r * 1.2 + Math.sin(time * 3 + i) * r * 0.3;
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+                const alpha = 0.15 + Math.random() * 0.2;
+                ctx.fillStyle = `rgba(255, 120, 30, ${alpha})`;
+                ctx.fillRect(Math.floor(px) - 2, Math.floor(py) - 2, 5, 5);
+            }
+            // 火焰主体 - 多层叠加
+            const flameLayers = [
+                { color: 'rgba(255, 60, 10, 0.85)', scale: 0.7, offsetY: 0 },
+                { color: 'rgba(255, 140, 20, 0.9)', scale: 0.55, offsetY: -2 },
+                { color: 'rgba(255, 200, 60, 0.95)', scale: 0.35, offsetY: -3 },
+            ];
+            flameLayers.forEach(layer => {
+                const fr = r * layer.scale;
+                for (let dy = -fr; dy <= fr; dy += 3) {
+                    const rowWidth = Math.floor(fr * Math.sqrt(Math.max(0, 1 - (dy / fr) * (dy / fr))));
+                                        const flicker = 1 + Math.sin(time * 8 + dy * 0.3) * 0.2;
+                    const rw = Math.floor(rowWidth * flicker);
+                    for (let dx = -rw; dx <= rw; dx += 2) {
+                        ctx.fillStyle = layer.color;
+                        ctx.fillRect(Math.floor(cx + dx), Math.floor(cy + dy + layer.offsetY), 3, 3);
+                    }
+                }
+            });
+            // 内核白热
+            const coreR = r * 0.18;
+            for (let dy = -coreR; dy <= coreR; dy += 2) {
+                const rw = Math.floor(coreR * Math.sqrt(Math.max(0, 1 - (dy / coreR) * (dy / coreR))));
+                for (let dx = -rw; dx <= rw; dx += 2) {
+                    ctx.fillStyle = 'rgba(255, 255, 240, 0.95)';
+                    ctx.fillRect(Math.floor(cx + dx), Math.floor(cy + dy), 2, 2);
+                }
+            }
+            // 火星飘散
+            for (let i = 0; i < 12; i++) {
+                const sparkAngle = time * 2 + i * 1.2;
+                const sparkDist = r * 0.6 + Math.sin(time * 5 + i) * r * 0.8;
+                const sx = cx + Math.cos(sparkAngle) * sparkDist;
+                const sy = cy + Math.sin(sparkAngle) * sparkDist - time * 10 % r;
+                ctx.fillStyle = 'rgba(255, 180, 40, 0.7)';
+                ctx.fillRect(Math.floor(sx), Math.floor(sy), 2, 2);
+            }
+        }
+
+        // ========== 游戏主循环 ==========
+        function gameLoop() {
+            if (!gameScreen.classList.contains('active')) return;
+            gameCtx.clearRect(0, 0, gameW, gameH);
+
+            // 波浪暗潮背景
+            drawWaveBackground(gameCtx, gameW, gameH);
+
+            // 画祭坛
+            drawAltar(gameCtx, altar.x, altar.y, altar.width, altar.height);
+
+            // 画主神火焰
+            drawGodFlame(gameCtx, god.x, god.y, god.radius);
+
+            // 更新玩家位置
+            if (!inDialog) {
+                player.x += inputDir.x * player.speed;
+                player.y += inputDir.y * player.speed;
+                // 边界限制
+                player.x = Math.max(0, Math.min(gameW - player.width, player.x));
+                player.y = Math.max(0, Math.min(gameH - player.height, player.y));
+            }
+
+            // 画玩家
+            if (playerImgObj.complete && playerImgObj.src) {
+                gameCtx.drawImage(playerImgObj, player.x, player.y, player.width, player.height);
+            } else {
+                // 占位
+                gameCtx.fillStyle = '#c8aa8c';
+                gameCtx.fillRect(player.x, player.y, player.width, player.height);
+            }
+
+            // 检测是否靠近主神
+            const distToGod = Math.hypot(
+                (player.x + player.width / 2) - god.x,
+                (player.y + player.height / 2) - god.y
+            );
+            if (distToGod < god.radius + 40 && !inDialog) {
+                btnInteract.classList.add('glow');
+            } else {
+                btnInteract.classList.remove('glow');
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ========== 摇杆控制 ==========
+        const joystickArea = document.getElementById('joystick-area');
+        const joystickThumb = document.getElementById('joystick-thumb');
+        let joystickActive = false;
+        let joystickId = null;
+        const joystickBaseRect = joystickArea.getBoundingClientRect();
+        let joystickCenterX = 0, joystickCenterY = 0;
+        const maxDist = 40;
+
+        function updateJoystickCenter() {
+            const rect = joystickArea.getBoundingClientRect();
+            joystickCenterX = rect.left + rect.width / 2;
+            joystickCenterY = rect.top + rect.height / 2;
+        }
+
+        joystickArea.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            updateJoystickCenter();
+            const touch = e.changedTouches[0];
+            joystickId = touch.identifier;
+            joystickActive = true;
+            handleJoystickMove(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        joystickArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickId) {
+                    handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                }
+            }
+        }, { passive: false });
+
+        joystickArea.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickId) {
+                    joystickActive = false;
+                    joystickId = null;
+                    joystickThumb.style.transform = 'translate(-50%, -50%)';
+                    inputDir.x = 0;
+                    inputDir.y = 0;
+                }
+            }
+        }, { passive: false });
+
+        function handleJoystickMove(clientX, clientY) {
+            let dx = clientX - joystickCenterX;
+            let dy = clientY - joystickCenterY;
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxDist) {
+                dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist;
+            }
+            joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            inputDir.x = dx / maxDist;
+            inputDir.y = dy / maxDist;
+        }
+
+        // 键盘支持（方便电脑测试）
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            updateKeyboardInput();
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+            updateKeyboardInput();
+        });
+        function updateKeyboardInput() {
+            inputDir.x = 0; inputDir.y = 0;
+            if (keys['ArrowLeft'] || keys['a']) inputDir.x = -1;
+            if (keys['ArrowRight'] || keys['d']) inputDir.x = 1;
+            if (keys['ArrowUp'] || keys['w']) inputDir.y = -1;
+            if (keys['ArrowDown'] || keys['s']) inputDir.y = 1;
+        }
+
+        // ========== 交互按钮 ==========
+        btnInteract.addEventListener('click', () => {
+            if (inDialog) return;
+            const distToGod = Math.hypot(
+                (player.x + player.width / 2) - god.x,
+                (player.y + player.height / 2) - god.y
+            );
+            if (distToGod < god.radius + 40) {
+                startDialog();
+            }
+        });
+
+        function startDialog() {
+            inDialog = true;
+            dialogIndex = 0;
+            inputDir.x = 0; inputDir.y = 0;
+            dialogBox.classList.add('active');
+            showDialogLine();
+        }
+
+        function showDialogLine() {
+            if (dialogIndex < godDialogues.length) {
+                const line = godDialogues[dialogIndex];
+                dialogSpeaker.textContent = line.speaker;
+                dialogText.textContent = line.text;
+            } else {
+                endDialog();
+            }
+        }
+
+        function endDialog() {
+            dialogBox.classList.remove('active');
+            inDialog = false;
+            // TODO: 进入信物选择界面
+            console.log('对话结束，进入信物选择');
+        }
+
+        dialogBox.addEventListener('click', () => {
+            if (!inDialog) return;
+            dialogIndex++;
+            showDialogLine();
+        });
+
+        // ========== 窗口大小调整 ==========
+        window.addEventListener('resize', () => {
+            if (gameScreen.classList.contains('active')) {
+                resizeGameCanvas();
+            }
         });
     </script>
 </body>
