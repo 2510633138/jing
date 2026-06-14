@@ -600,10 +600,10 @@
         let inDialog = false;
         let dialogIndex = 0;
         const godDialogues = [
-            { speaker: '🔥 主神', text: '你终于来了，' + playerName + '。' },
-            { speaker: '🔥 主神', text: '我已在此等候多时……' },
-            { speaker: '🔥 主神', text: '在继续之前，告诉我你所携带的信物。' },
-            { speaker: '🔥 主神', text: '它们将决定你前行的道路。' },
+            { speaker: '🔥 老师', text: '你终于来了，' + playerName + '。' },
+            { speaker: '🔥 老师', text: '我已在此等候多时……' },
+            { speaker: '🔥 老师', text: '经历了这么多，不知道你都收获了什么？' },
+            { speaker: '🔥 老师', text: '它们将决定你前方的路途。' },
         ];
 
         function resizeGameCanvas() {
@@ -786,64 +786,71 @@ if (godImg.complete && godImg.src) {
             requestAnimationFrame(gameLoop);
         }
 
-        // ========== 摇杆控制 ==========
-        const joystickArea = document.getElementById('joystick-area');
-        const joystickThumb = document.getElementById('joystick-thumb');
-        let joystickActive = false;
-        let joystickId = null;
-        const joystickBaseRect = joystickArea.getBoundingClientRect();
-        let joystickCenterX = 0, joystickCenterY = 0;
-        const maxDist = 40;
+       // ========== 摇杆控制 ==========
+const joystickArea = document.getElementById('joystick-area');
+const joystickThumb = document.getElementById('joystick-thumb');
+let joystickActive = false;
+let joystickId = null;
+let joystickCenterX = 0, joystickCenterY = 0;
+const maxDist = 40;
 
-        function updateJoystickCenter() {
-            const rect = joystickArea.getBoundingClientRect();
-            joystickCenterX = rect.left + rect.width / 2;
-            joystickCenterY = rect.top + rect.height / 2;
+function updateJoystickCenter() {
+    const rect = joystickArea.getBoundingClientRect();
+    joystickCenterX = rect.left + rect.width / 2;
+    joystickCenterY = rect.top + rect.height / 2;
+}
+
+joystickArea.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    updateJoystickCenter();
+    const touch = e.changedTouches[0];
+    joystickId = touch.identifier;
+    joystickActive = true;
+    handleJoystickMove(touch.clientX, touch.clientY);
+}, { passive: false });
+
+joystickArea.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === joystickId) {
+            handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
         }
+    }
+}, { passive: false });
 
-        joystickArea.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            updateJoystickCenter();
-            const touch = e.changedTouches[0];
-            joystickId = touch.identifier;
-            joystickActive = true;
-            handleJoystickMove(touch.clientX, touch.clientY);
-        }, { passive: false });
-
-        joystickArea.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === joystickId) {
-                    handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
-                }
-            }
-        }, { passive: false });
-
-        joystickArea.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === joystickId) {
-                    joystickActive = false;
-                    joystickId = null;
-                    joystickThumb.style.transform = 'translate(-50%, -50%)';
-                    inputDir.x = 0;
-                    inputDir.y = 0;
-                }
-            }
-        }, { passive: false });
-
-        function handleJoystickMove(clientX, clientY) {
-            let dx = clientX - joystickCenterX;
-            let dy = clientY - joystickCenterY;
-            const dist = Math.hypot(dx, dy);
-            if (dist > maxDist) {
-                dx = (dx / dist) * maxDist;
-                dy = (dy / dist) * maxDist;
-            }
-            joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-            inputDir.x = dx / maxDist;
-            inputDir.y = dy / maxDist;
+joystickArea.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === joystickId) {
+            joystickActive = false;
+            joystickId = null;
+            joystickThumb.style.transform = 'translate(-50%, -50%)';
+            inputDir.x = 0;
+            inputDir.y = 0;
         }
+    }
+}, { passive: false });
+
+joystickArea.addEventListener('touchcancel', (e) => {
+    joystickActive = false;
+    joystickId = null;
+    joystickThumb.style.transform = 'translate(-50%, -50%)';
+    inputDir.x = 0;
+    inputDir.y = 0;
+}, { passive: false });
+
+function handleJoystickMove(clientX, clientY) {
+    let dx = clientX - joystickCenterX;
+    let dy = clientY - joystickCenterY;
+    const dist = Math.hypot(dx, dy);
+    if (dist > maxDist) {
+        dx = (dx / dist) * maxDist;
+        dy = (dy / dist) * maxDist;
+    }
+    joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    inputDir.x = dx / maxDist;
+    inputDir.y = dy / maxDist;
+}
 
         // 键盘支持（方便电脑测试）
         const keys = {};
