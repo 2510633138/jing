@@ -363,6 +363,8 @@
 
         <!-- 游戏场景 -->
         <div id="game-screen">
+            <img id="altar-img" src="jitan.png" style="display:none;">
+            <img id="god-img" src="zhushen.png" style="display:none;">
             <canvas class="game-canvas" id="game-canvas"></canvas>
             
             <div class="joystick-area" id="joystick-area">
@@ -587,11 +589,11 @@
         let gameW, gameH;
 
         // 玩家
-        let player = { x: 0, y: 0, width: 32, height: 32, speed: 2 };
+        let player = { x: 0, y: 0, width: 56, height: 56, speed: 2 };
         // 祭坛位置（画面中央偏上）
-        let altar = { x: 0, y: 0, width: 120, height: 60 };
+        let altar = { x: 0, y: 0, width: 160, height: 70 };
         // 主神（火焰）位置（画面中央偏下）
-        let god = { x: 0, y: 0, radius: 40 };
+        let god = { x: 0, y: 0, radius: 28 };
         // 移动输入
         let inputDir = { x: 0, y: 0 };
         // 对话状态
@@ -617,7 +619,7 @@
             god.y = gameH * 0.68;
             // 玩家初始位置（祭坛上）
             player.x = altar.x + altar.width / 2 - player.width / 2;
-            player.y = altar.y - player.height;
+            player.y = altar.y - player.height + 8;
         }
 
         function initGameScene() {
@@ -735,11 +737,22 @@
             // 波浪暗潮背景
             drawWaveBackground(gameCtx, gameW, gameH);
 
-            // 画祭坛
-            drawAltar(gameCtx, altar.x, altar.y, altar.width, altar.height);
+           // 画祭坛图片
+const altarImg = document.getElementById('altar-img');
+if (altarImg.complete && altarImg.src) {
+    gameCtx.drawImage(altarImg, altar.x, altar.y, altar.width, altar.height);
+} else {
+    drawAltar(gameCtx, altar.x, altar.y, altar.width, altar.height);
+}
 
-            // 画主神火焰
-            drawGodFlame(gameCtx, god.x, god.y, god.radius);
+// 画主神图片
+const godImg = document.getElementById('god-img');
+if (godImg.complete && godImg.src) {
+    const godSize = god.radius * 2.5;
+    gameCtx.drawImage(godImg, god.x - godSize / 2, god.y - godSize / 2, godSize, godSize);
+} else {
+    drawGodFlame(gameCtx, god.x, god.y, god.radius);
+}
 
             // 更新玩家位置
             if (!inDialog) {
@@ -764,7 +777,7 @@
                 (player.x + player.width / 2) - god.x,
                 (player.y + player.height / 2) - god.y
             );
-            if (distToGod < god.radius + 40 && !inDialog) {
+            if (distToGod < god.radius + 50 && !inDialog) {
                 btnInteract.classList.add('glow');
             } else {
                 btnInteract.classList.remove('glow');
