@@ -367,10 +367,17 @@
             <img id="god-img" src="zhushen.png" style="display:none;">
             <canvas class="game-canvas" id="game-canvas"></canvas>
             
-            <div class="joystick-area" id="joystick-area">
-                <div class="joystick-base"></div>
-                <div class="joystick-thumb" id="joystick-thumb"></div>
-            </div>
+           <div class="dpad" id="dpad">
+    <div></div>
+    <button class="dpad-btn" id="btn-up">▲</button>
+    <div></div>
+    <button class="dpad-btn" id="btn-left">◀</button>
+    <div class="dpad-center"></div>
+    <button class="dpad-btn" id="btn-right">▶</button>
+    <div></div>
+    <button class="dpad-btn" id="btn-down">▼</button>
+    <div></div>
+</div>
             
             <button class="btn-interact" id="btn-interact">交 互</button>
 
@@ -737,21 +744,23 @@
             // 波浪暗潮背景
             drawWaveBackground(gameCtx, gameW, gameH);
 
-           // 画祭坛图片
+           // 画祭坛图片// 画祭坛图片
 const altarImg = document.getElementById('altar-img');
 if (altarImg.complete && altarImg.src) {
-    gameCtx.drawImage(altarImg, altar.x, altar.y, altar.width, altar.height);
-} else {
-    drawAltar(gameCtx, altar.x, altar.y, altar.width, altar.height);
+    const scale = altar.width / altarImg.naturalWidth;
+    const drawH = altarImg.naturalHeight * scale;
+    gameCtx.drawImage(altarImg, altar.x, altar.y - (drawH - altar.height), altar.width, drawH);
 }
 
 // 画主神图片
+// 画老师图片
 const godImg = document.getElementById('god-img');
 if (godImg.complete && godImg.src) {
-    const godSize = god.radius * 2.5;
-    gameCtx.drawImage(godImg, god.x - godSize / 2, god.y - godSize / 2, godSize, godSize);
-} else {
-    drawGodFlame(gameCtx, god.x, god.y, god.radius);
+    const godSize = god.radius * 3;
+    const ratio = godImg.naturalWidth / godImg.naturalHeight;
+    const drawW = godSize * ratio;
+    const drawH = godSize;
+    gameCtx.drawImage(godImg, god.x - drawW / 2, god.y - drawH / 2, drawW, drawH);
 }
 
             // 更新玩家位置
@@ -786,72 +795,40 @@ if (godImg.complete && godImg.src) {
             requestAnimationFrame(gameLoop);
         }
 
-       // ========== 摇杆控制 ==========
-const joystickArea = document.getElementById('joystick-area');
-const joystickThumb = document.getElementById('joystick-thumb');
-let joystickActive = false;
-let joystickId = null;
-let joystickCenterX = 0, joystickCenterY = 0;
-const maxDist = 40;
+        // ========== 方向按钮控制 ==========
+        const btnUp = document.getElementById('btn-up');
+        const btnDown = document.getElementById('btn-down');
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
 
-function updateJoystickCenter() {
-    const rect = joystickArea.getBoundingClientRect();
-    joystickCenterX = rect.left + rect.width / 2;
-    joystickCenterY = rect.top + rect.height / 2;
+function setDir(x, y) {
+    inputDir.x = x;
+    inputDir.y = y;
 }
 
-joystickArea.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    updateJoystickCenter();
-    const touch = e.changedTouches[0];
-    joystickId = touch.identifier;
-    joystickActive = true;
-    handleJoystickMove(touch.clientX, touch.clientY);
-}, { passive: false });
+// 按下
+btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(0, -1); });
+btnUp.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(0, -1); });
+btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(0, 1); });
+btnDown.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(0, 1); });
+btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(-1, 0); });
+btnLeft.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(-1, 0); });
+btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(1, 0); });
+btnRight.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(1, 0); });
 
-joystickArea.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === joystickId) {
-            handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
-        }
-    }
-}, { passive: false });
-
-joystickArea.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === joystickId) {
-            joystickActive = false;
-            joystickId = null;
-            joystickThumb.style.transform = 'translate(-50%, -50%)';
-            inputDir.x = 0;
-            inputDir.y = 0;
-        }
-    }
-}, { passive: false });
-
-joystickArea.addEventListener('touchcancel', (e) => {
-    joystickActive = false;
-    joystickId = null;
-    joystickThumb.style.transform = 'translate(-50%, -50%)';
-    inputDir.x = 0;
-    inputDir.y = 0;
-}, { passive: false });
-
-function handleJoystickMove(clientX, clientY) {
-    let dx = clientX - joystickCenterX;
-    let dy = clientY - joystickCenterY;
-    const dist = Math.hypot(dx, dy);
-    if (dist > maxDist) {
-        dx = (dx / dist) * maxDist;
-        dy = (dy / dist) * maxDist;
-    }
-    joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-    inputDir.x = dx / maxDist;
-    inputDir.y = dy / maxDist;
-}
-
+// 松开
+btnUp.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
+btnUp.addEventListener('mouseup', () => { setDir(0, 0); });
+btnUp.addEventListener('mouseleave', () => { setDir(0, 0); });
+btnDown.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
+btnDown.addEventListener('mouseup', () => { setDir(0, 0); });
+btnDown.addEventListener('mouseleave', () => { setDir(0, 0); });
+btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
+btnLeft.addEventListener('mouseup', () => { setDir(0, 0); });
+btnLeft.addEventListener('mouseleave', () => { setDir(0, 0); });
+btnRight.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
+btnRight.addEventListener('mouseup', () => { setDir(0, 0); });
+btnRight.addEventListener('mouseleave', () => { setDir(0, 0); });
         // 键盘支持（方便电脑测试）
         const keys = {};
         window.addEventListener('keydown', (e) => {
