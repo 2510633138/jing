@@ -31,7 +31,6 @@
             overflow: hidden;
         }
 
-        /* ========== 封面 ========== */
         #cover-screen {
             position: absolute;
             top: 0;
@@ -116,7 +115,6 @@
             text-decoration: line-through;
         }
 
-        /* ========== 创建角色界面 ========== */
         #create-screen {
             position: absolute;
             top: 0;
@@ -125,9 +123,10 @@
             height: 100%;
             display: none;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             z-index: 10;
+            padding-top: 80px;
         }
 
         #create-screen.active {
@@ -267,7 +266,6 @@
 <body>
     <div class="game-container" id="game-container">
         
-        <!-- 封面 -->
         <div id="cover-screen">
             <canvas class="pixel-particles" id="particles-canvas"></canvas>
             <h1 class="cover-title">镜</h1>
@@ -275,7 +273,6 @@
             <button class="btn-music" id="btn-music">🔇 点击开启音乐</button>
         </div>
 
-        <!-- 创建角色界面 -->
         <div id="create-screen">
             <canvas class="tentacle-canvas" id="tentacle-canvas"></canvas>
             <div class="create-panel">
@@ -298,7 +295,6 @@
     </audio>
 
     <script>
-        // ========== 背景音乐控制 ==========
         const bgm = document.getElementById('bgm');
         const btnMusic = document.getElementById('btn-music');
         let musicStarted = false;
@@ -335,7 +331,6 @@
             }
         }, { once: false });
 
-        // ========== 封面粒子 ==========
         const particlesCanvas = document.getElementById('particles-canvas');
         const particlesCtx = particlesCanvas.getContext('2d');
         const container = document.getElementById('game-container');
@@ -413,7 +408,7 @@
             resizeParticlesCanvas();
         });
 
-        // ========== 章鱼触手背景 ==========
+        // ========== 触手（原始细版） ==========
         const tentacleCanvas = document.getElementById('tentacle-canvas');
         const tentacleCtx = tentacleCanvas.getContext('2d');
 
@@ -422,41 +417,30 @@
             tentacleCanvas.height = container.clientHeight;
         }
 
-        class OctopusTentacle {
+        class Tentacle {
             constructor() {
                 this.reset();
             }
 
             reset() {
-                this.baseX = tentacleCanvas.width * 0.2 + Math.random() * tentacleCanvas.width * 0.6;
-                this.baseY = tentacleCanvas.height + 10;
-                // 触手高度：比之前更高大
-                this.height = 150 + Math.random() * 280;
-                // 分段
-                this.segments = 14 + Math.floor(Math.random() * 16);
-                // 蠕动
+                this.baseX = Math.random() * tentacleCanvas.width;
+                this.baseY = tentacleCanvas.height;
+                this.height = 60 + Math.random() * 200;
+                this.segments = 8 + Math.floor(Math.random() * 15);
                 this.phase = Math.random() * Math.PI * 2;
-                this.phaseSpeed = 0.015 + Math.random() * 0.03;
-                // 摆动幅度
-                this.amplitude = 15 + Math.random() * 40;
-                // 粗细：章鱼触须，粗壮
-                this.thickness = 10 + Math.random() * 18;
-                // 颜色
-                const redBase = 80 + Math.floor(Math.random() * 50);
-                this.baseColor = `rgba(${redBase}, ${15 + Math.floor(Math.random() * 20)}, ${10 + Math.floor(Math.random() * 15)}, 0.9)`;
-                this.tipColor = `rgba(${redBase + 20}, 8, 3, 0.75)`;
-                // 吸盘颜色
-                this.suckerColor = `rgba(${redBase - 30}, 5, 5, 0.5)`;
-                this.lifespan = 500 + Math.random() * 700;
+                this.phaseSpeed = 0.02 + Math.random() * 0.04;
+                this.amplitude = 8 + Math.random() * 25;
+                this.thickness = 2 + Math.random() * 4;
+                const redBase = 100 + Math.floor(Math.random() * 60);
+                this.color = `rgba(${redBase}, ${20 + Math.floor(Math.random() * 30)}, ${15 + Math.floor(Math.random() * 20)}, 0.85)`;
+                this.tipColor = `rgba(${redBase - 20}, 10, 5, 0.7)`;
+                this.lifespan = 400 + Math.random() * 600;
                 this.age = Math.floor(Math.random() * this.lifespan);
-                // 第二相位，让不同段有不同节奏
-                this.phase2 = Math.random() * Math.PI * 2;
             }
 
             update() {
                 this.age++;
                 this.phase += this.phaseSpeed;
-                this.phase2 += this.phaseSpeed * 0.7;
                 if (this.age >= this.lifespan) {
                     this.reset();
                 }
@@ -466,90 +450,65 @@
                 const points = [];
                 for (let i = 0; i <= this.segments; i++) {
                     const t = i / this.segments;
-                    // 复合摆动：大波浪 + 小波浪
-                    const xOffset = Math.sin(this.phase + t * 3.0) * this.amplitude * t;
-                    const xOffset2 = Math.cos(this.phase2 + t * 2.2) * this.amplitude * 0.5 * t;
-                    const xOffset3 = Math.sin(this.phase * 2.1 + t * 4.5) * this.amplitude * 0.2 * t * t;
-                    const px = this.baseX + xOffset + xOffset2 + xOffset3;
+                    const xOffset = Math.sin(this.phase + t * 2.5) * this.amplitude * t;
+                    const xOffset2 = Math.cos(this.phase * 1.3 + t * 1.8) * this.amplitude * 0.4 * t;
+                    const px = this.baseX + xOffset + xOffset2;
                     const py = this.baseY - this.height * t;
                     points.push({ x: px, y: py, t: t });
                 }
 
-                // 画触手主体：从上到下逐段画
-                for (let i = points.length - 2; i >= 0; i--) {
-                    const p = points[i];
-                    const pNext = points[i + 1];
-                    const t = p.t;
-                    const currentThickness = Math.ceil(this.thickness * (1 - t * 0.55));
-                    if (currentThickness <= 0) continue;
+                for (let i = 0; i < points.length - 1; i++) {
+                    const p1 = points[i];
+                    const p2 = points[i + 1];
+                    const t = p1.t;
+                    const thickness = Math.ceil(this.thickness * (1 - t * 0.7));
+                    const color = t > 0.7 ? this.tipColor : this.color;
 
-                    // 渐变色
-                    const alpha = 0.65 + 0.35 * (1 - t);
-                    const gradient = ctx.createLinearGradient(p.x, p.y, pNext.x, pNext.y);
-                    const r1 = 80 + Math.floor(40 * (1 - t));
-                    const r2 = 60 + Math.floor(30 * (1 - t));
-                    gradient.addColorStop(0, `rgba(${r1}, ${18 + Math.floor(10 * (1 - t))}, ${10}, ${alpha})`);
-                    gradient.addColorStop(1, `rgba(${r2}, ${12}, ${6}, ${alpha * 0.8})`);
-
-                    ctx.fillStyle = gradient;
-
-                    // 画这一段的矩形块（粗）
-                    const dx = pNext.x - p.x;
-                    const dy = pNext.y - p.y;
-                    const len = Math.sqrt(dx * dx + dy * dy);
-                    const nx = -dy / (len || 1);
-                    const ny = dx / (len || 1);
-
-                    // 多画几层让触手更粗更实
-                    for (let layer = 1; layer <= 3; layer++) {
-                        const lt = currentThickness * (layer / 3);
-                        for (let w = -lt; w <= lt; w += 3) {
-                            const sx = Math.floor(p.x + nx * w);
-                            const sy = Math.floor(p.y + ny * w);
-                            ctx.fillRect(sx, sy, 3, 3);
+                    for (let dy = -thickness; dy <= thickness; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const sx = Math.floor(p1.x + dx);
+                            const sy = Math.floor(p1.y + dy);
+                            if (Math.random() > 0.15) {
+                                ctx.fillStyle = color;
+                                ctx.fillRect(sx, sy, 2, 2);
+                            }
                         }
                     }
 
-                    // 画吸盘（触手下侧，间隔分布）
-                    if (i % 2 === 0 && currentThickness > 6) {
-                        const suckCount = Math.floor(currentThickness / 5);
-                        for (let s = 0; s < suckCount; s++) {
-                            const sOffset = (s - suckCount / 2) * 5;
-                            const sx = Math.floor(p.x + nx * sOffset);
-                            const sy = Math.floor(p.y + ny * sOffset + 2);
-                            ctx.fillStyle = this.suckerColor;
-                            ctx.fillRect(sx - 1, sy - 1, 3, 3);
-                            ctx.fillRect(sx, sy, 2, 2);
-                            // 吸盘中心亮点
-                            ctx.fillStyle = `rgba(60, 10, 5, 0.4)`;
-                            ctx.fillRect(sx, sy, 1, 1);
+                    const steps = Math.ceil(Math.abs(p2.y - p1.y) / 4);
+                    for (let s = 0; s < steps; s++) {
+                        const st = s / steps;
+                        const sx = Math.floor(p1.x + (p2.x - p1.x) * st);
+                        const sy = Math.floor(p1.y + (p2.y - p1.y) * st);
+                        const st2 = p1.t + (p2.t - p1.t) * st;
+                        const sthickness = Math.ceil(this.thickness * (1 - st2 * 0.7));
+                        for (let dy = -sthickness; dy <= sthickness; dy++) {
+                            if (Math.random() > 0.2) {
+                                ctx.fillStyle = color;
+                                ctx.fillRect(sx, sy + dy, 2, 2);
+                            }
                         }
                     }
                 }
 
-                // 触手尖端 - 卷曲的小触须
-                const tip = points[0];
-                const tipPrev = points[1] || tip;
-                const tipAngle = Math.atan2(tip.y - tipPrev.y, tip.x - tipPrev.x);
-                for (let c = 0; c < 5; c++) {
-                    const curlAngle = tipAngle + this.phase * 2 + c * 0.7;
-                    const curlDist = c * 5;
-                    const cx = Math.floor(tip.x + Math.cos(curlAngle) * curlDist);
-                    const cy = Math.floor(tip.y + Math.sin(curlAngle) * curlDist);
+                const tip = points[points.length - 1];
+                for (let i = 0; i < 3; i++) {
+                    const angle = this.phase + i * 2.1;
+                    const tx = Math.floor(tip.x + Math.cos(angle) * 6);
+                    const ty = Math.floor(tip.y + Math.sin(angle) * 6);
                     ctx.fillStyle = this.tipColor;
-                    ctx.fillRect(cx, cy, 3, 3);
-                    ctx.fillRect(cx + 1, cy, 2, 2);
+                    ctx.fillRect(tx, ty, 2, 2);
                 }
             }
         }
 
         let tentacles = [];
-        const TENTACLE_COUNT = 7;
+        const TENTACLE_COUNT = 12;
 
         function initTentacles() {
             tentacles = [];
             for (let i = 0; i < TENTACLE_COUNT; i++) {
-                const t = new OctopusTentacle();
+                const t = new Tentacle();
                 t.age = Math.floor(Math.random() * t.lifespan);
                 tentacles.push(t);
             }
@@ -627,7 +586,6 @@
             console.log('玩家名字:', playerName);
             console.log('形象数据已就绪');
             createScreen.classList.remove('active');
-            // TODO: 进入祭坛场景
         });
     </script>
 </body>
