@@ -133,7 +133,7 @@
             display: flex;
         }
 
-        .tentacle-canvas {
+        .eye-canvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -274,7 +274,7 @@
         </div>
 
         <div id="create-screen">
-            <canvas class="tentacle-canvas" id="tentacle-canvas"></canvas>
+            <canvas class="eye-canvas" id="eye-canvas"></canvas>
             <div class="create-panel">
                 <h2 class="create-title">创 建 角 色</h2>
                 <input type="text" class="input-name" id="input-name" placeholder="输入你的名字" maxlength="8">
@@ -408,127 +408,194 @@
             resizeParticlesCanvas();
         });
 
-        // ========== 触手（原始细版） ==========
-        const tentacleCanvas = document.getElementById('tentacle-canvas');
-        const tentacleCtx = tentacleCanvas.getContext('2d');
+        // ========== 眨眼眼睛背景 ==========
+        const eyeCanvas = document.getElementById('eye-canvas');
+        const eyeCtx = eyeCanvas.getContext('2d');
 
-        function resizeTentacleCanvas() {
-            tentacleCanvas.width = container.clientWidth;
-            tentacleCanvas.height = container.clientHeight;
+        function resizeEyeCanvas() {
+            eyeCanvas.width = container.clientWidth;
+            eyeCanvas.height = container.clientHeight;
         }
 
-        class Tentacle {
+        class FloatingEye {
             constructor() {
                 this.reset();
             }
 
             reset() {
-                this.baseX = Math.random() * tentacleCanvas.width;
-                this.baseY = tentacleCanvas.height;
-                this.height = 60 + Math.random() * 200;
-                this.segments = 8 + Math.floor(Math.random() * 15);
-                this.phase = Math.random() * Math.PI * 2;
-                this.phaseSpeed = 0.02 + Math.random() * 0.04;
-                this.amplitude = 8 + Math.random() * 25;
-                this.thickness = 2 + Math.random() * 4;
-                const redBase = 100 + Math.floor(Math.random() * 60);
-                this.color = `rgba(${redBase}, ${20 + Math.floor(Math.random() * 30)}, ${15 + Math.floor(Math.random() * 20)}, 0.85)`;
-                this.tipColor = `rgba(${redBase - 20}, 10, 5, 0.7)`;
-                this.lifespan = 400 + Math.random() * 600;
-                this.age = Math.floor(Math.random() * this.lifespan);
+                this.x = 20 + Math.random() * (eyeCanvas.width - 40);
+                this.y = 30 + Math.random() * (eyeCanvas.height * 0.8);
+                // 眼睛大小
+                this.size = 16 + Math.random() * 40;
+                // 眨眼周期
+                this.blinkInterval = 120 + Math.random() * 200; // 帧
+                this.blinkTimer = Math.floor(Math.random() * this.blinkInterval);
+                this.isBlinking = false;
+                this.blinkProgress = 0; // 0=睁开, 1=闭眼
+                this.blinkSpeed = 0.06 + Math.random() * 0.1;
+                // 眼球微微飘动
+                this.floatPhase = Math.random() * Math.PI * 2;
+                this.floatSpeed = 0.005 + Math.random() * 0.015;
+                this.floatRange = 3 + Math.random() * 8;
+                this.originX = this.x;
+                this.originY = this.y;
+                // 瞳孔方向（微微偏移）
+                this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.2;
+                this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.2;
+                // 颜色
+                const glow = 120 + Math.floor(Math.random() * 80);
+                this.irisColor = `rgba(${glow - 40}, ${glow - 80}, ${glow - 60}, 0.85)`;
+                this.pupilColor = '#0a0000';
+                this.scleraColor = 'rgba(200, 180, 170, 0.6)';
             }
 
             update() {
-                this.age++;
-                this.phase += this.phaseSpeed;
-                if (this.age >= this.lifespan) {
-                    this.reset();
+                // 漂浮
+                this.floatPhase += this.floatSpeed;
+                this.x = this.originX + Math.sin(this.floatPhase) * this.floatRange;
+                this.y = this.originY + Math.cos(this.floatPhase * 1.3) * this.floatRange * 0.6;
+
+                // 眨眼逻辑
+                this.blinkTimer++;
+                if (this.blinkTimer >= this.blinkInterval) {
+                    this.isBlinking = true;
+                    this.blinkTimer = 0;
+                    this.blinkInterval = 100 + Math.random() * 250;
+                }
+
+                if (this.isBlinking) {
+                    this.blinkProgress += this.blinkSpeed;
+                    if (this.blinkProgress >= 1) {
+                        this.blinkProgress = 1;
+                        // 开始睁眼
+                        this.isBlinking = false;
+                    }
+                } else {
+                    if (this.blinkProgress > 0) {
+                        this.blinkProgress -= this.blinkSpeed;
+                        if (this.blinkProgress < 0) this.blinkProgress = 0;
+                    }
+                }
+
+                // 偶尔换瞳孔方向
+                if (Math.random() < 0.003) {
+                    this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.3;
+                    this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.3;
                 }
             }
 
             draw(ctx) {
-                const points = [];
-                for (let i = 0; i <= this.segments; i++) {
-                    const t = i / this.segments;
-                    const xOffset = Math.sin(this.phase + t * 2.5) * this.amplitude * t;
-                    const xOffset2 = Math.cos(this.phase * 1.3 + t * 1.8) * this.amplitude * 0.4 * t;
-                    const px = this.baseX + xOffset + xOffset2;
-                    const py = this.baseY - this.height * t;
-                    points.push({ x: px, y: py, t: t });
+                const cx = Math.floor(this.x);
+                const cy = Math.floor(this.y);
+                const s = Math.floor(this.size);
+                const halfS = Math.floor(s / 2);
+                const blinkRatio = this.blinkProgress;
+
+                // 眼白（椭圆）
+                const eyeHeight = Math.floor(halfS * 1.3 * (1 - blinkRatio));
+                const eyeWidth = Math.floor(halfS * 1.4);
+
+                if (eyeHeight <= 0) return;
+
+                // 用像素块画眼白
+                for (let dy = -eyeHeight; dy <= eyeHeight; dy += 2) {
+                    const ratio = Math.abs(dy) / eyeHeight;
+                    const rowWidth = Math.floor(eyeWidth * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                    for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
+                        const px = cx + dx;
+                        const py = cy + dy;
+                        // 边缘稍暗
+                        const edgeDist = Math.abs(dx) / (rowWidth || 1);
+                        const alpha = 0.35 + 0.25 * (1 - edgeDist);
+                        ctx.fillStyle = `rgba(190, 170, 155, ${alpha})`;
+                        ctx.fillRect(px, py, 2, 2);
+                    }
                 }
 
-                for (let i = 0; i < points.length - 1; i++) {
-                    const p1 = points[i];
-                    const p2 = points[i + 1];
-                    const t = p1.t;
-                    const thickness = Math.ceil(this.thickness * (1 - t * 0.7));
-                    const color = t > 0.7 ? this.tipColor : this.color;
+                // 虹膜
+                const irisR = Math.floor(halfS * 0.55);
+                const irisHeight = Math.floor(irisR * (1 - blinkRatio));
+                if (irisHeight > 0) {
+                    for (let dy = -irisHeight; dy <= irisHeight; dy += 2) {
+                        const ratio = Math.abs(dy) / irisHeight;
+                        const rowWidth = Math.floor(irisR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                        for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
+                            ctx.fillStyle = this.irisColor;
+                            ctx.fillRect(cx + dx, cy + dy, 2, 2);
+                        }
+                    }
 
-                    for (let dy = -thickness; dy <= thickness; dy++) {
-                        for (let dx = -1; dx <= 1; dx++) {
-                            const sx = Math.floor(p1.x + dx);
-                            const sy = Math.floor(p1.y + dy);
-                            if (Math.random() > 0.15) {
-                                ctx.fillStyle = color;
-                                ctx.fillRect(sx, sy, 2, 2);
+                    // 瞳孔
+                    const pupilR = Math.floor(irisR * 0.45);
+                    const px = Math.floor(cx + this.pupilOffsetX * (1 - blinkRatio));
+                    const py = Math.floor(cy + this.pupilOffsetY * (1 - blinkRatio));
+                    const pupilHeight = Math.floor(pupilR * (1 - blinkRatio));
+                    if (pupilHeight > 0) {
+                        for (let dy = -pupilHeight; dy <= pupilHeight; dy += 2) {
+                            const ratio = Math.abs(dy) / pupilHeight;
+                            const rowWidth = Math.floor(pupilR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                            for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
+                                ctx.fillStyle = this.pupilColor;
+                                ctx.fillRect(px + dx, py + dy, 2, 2);
                             }
                         }
                     }
 
-                    const steps = Math.ceil(Math.abs(p2.y - p1.y) / 4);
-                    for (let s = 0; s < steps; s++) {
-                        const st = s / steps;
-                        const sx = Math.floor(p1.x + (p2.x - p1.x) * st);
-                        const sy = Math.floor(p1.y + (p2.y - p1.y) * st);
-                        const st2 = p1.t + (p2.t - p1.t) * st;
-                        const sthickness = Math.ceil(this.thickness * (1 - st2 * 0.7));
-                        for (let dy = -sthickness; dy <= sthickness; dy++) {
-                            if (Math.random() > 0.2) {
-                                ctx.fillStyle = color;
-                                ctx.fillRect(sx, sy + dy, 2, 2);
+                    // 高光
+                    const highlightR = Math.floor(pupilR * 0.4);
+                    const hx = cx - Math.floor(irisR * 0.25);
+                    const hy = cy - Math.floor(irisR * 0.2);
+                    const hlHeight = Math.floor(highlightR * (1 - blinkRatio));
+                    if (hlHeight > 0) {
+                        for (let dy = -hlHeight; dy <= hlHeight; dy += 2) {
+                            const ratio = Math.abs(dy) / hlHeight;
+                            const rowWidth = Math.floor(highlightR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
+                            for (let dx = -rowWidth; dx <= rowWidth; dx += 2) {
+                                if (Math.random() > 0.4) {
+                                    ctx.fillStyle = 'rgba(255, 240, 230, 0.7)';
+                                    ctx.fillRect(hx + dx, hy + dy, 2, 2);
+                                }
                             }
                         }
                     }
                 }
 
-                const tip = points[points.length - 1];
-                for (let i = 0; i < 3; i++) {
-                    const angle = this.phase + i * 2.1;
-                    const tx = Math.floor(tip.x + Math.cos(angle) * 6);
-                    const ty = Math.floor(tip.y + Math.sin(angle) * 6);
-                    ctx.fillStyle = this.tipColor;
-                    ctx.fillRect(tx, ty, 2, 2);
+                // 上下眼睑线（像素边框）
+                if (blinkRatio < 0.9) {
+                    ctx.strokeStyle = 'rgba(100, 50, 40, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.ellipse(cx, cy, eyeWidth, eyeHeight, 0, 0, Math.PI * 2);
+                    ctx.stroke();
                 }
             }
         }
 
-        let tentacles = [];
-        const TENTACLE_COUNT = 12;
+        let eyes = [];
+        const EYE_COUNT = 8;
 
-        function initTentacles() {
-            tentacles = [];
-            for (let i = 0; i < TENTACLE_COUNT; i++) {
-                const t = new Tentacle();
-                t.age = Math.floor(Math.random() * t.lifespan);
-                tentacles.push(t);
+        function initEyes() {
+            eyes = [];
+            for (let i = 0; i < EYE_COUNT; i++) {
+                eyes.push(new FloatingEye());
             }
         }
 
-        function animateTentacles() {
-            tentacleCtx.clearRect(0, 0, tentacleCanvas.width, tentacleCanvas.height);
-            tentacles.forEach(t => {
-                t.update();
-                t.draw(tentacleCtx);
+        function animateEyes() {
+            eyeCtx.clearRect(0, 0, eyeCanvas.width, eyeCanvas.height);
+            eyes.forEach(eye => {
+                eye.update();
+                eye.draw(eyeCtx);
             });
-            requestAnimationFrame(animateTentacles);
+            requestAnimationFrame(animateEyes);
         }
 
-        resizeTentacleCanvas();
-        initTentacles();
-        animateTentacles();
+        resizeEyeCanvas();
+        initEyes();
+        animateEyes();
 
         window.addEventListener('resize', () => {
-            resizeTentacleCanvas();
+            resizeEyeCanvas();
         });
 
         // ========== 界面切换 ==========
@@ -546,7 +613,7 @@
         document.getElementById('btn-start').addEventListener('click', () => {
             coverScreen.style.display = 'none';
             createScreen.classList.add('active');
-            resizeTentacleCanvas();
+            resizeEyeCanvas();
         });
 
         inputName.addEventListener('input', () => {
