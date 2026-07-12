@@ -617,12 +617,11 @@
         let inDialog = false;
         let dialogIndex = 0;
         const godDialogues = [
-            { speaker: '🔥 老师', text: '你终于来了，' + playerName + '。' },
-            { speaker: '🔥 老师', text: '我已在此等候多时……' },
-            { speaker: '🔥 老师', text: '经历了这么多，不知道你都收获了什么？' },
-            { speaker: '🔥 老师', text: '它们将决定你前方的路途。' },
-        ];
-
+    { speaker: '江玄贞', text: () => '你终于来了，' + playerName + '。' },
+    { speaker: '江玄贞', text: '期中过得怎么样？' },
+    { speaker: '江玄贞', text: '经历了这么多，不知道你都收获了什么。' },
+    { speaker: '江玄贞', text: '你的收获将决定你前方的路途。' },
+];
         function resizeGameCanvas() {
             gameW = container.clientWidth;
             gameH = container.clientHeight;
@@ -904,7 +903,7 @@ btnRight.addEventListener('mouseleave', () => { setDir(0, 0); });
             if (dialogIndex < godDialogues.length) {
                 const line = godDialogues[dialogIndex];
                 dialogSpeaker.textContent = line.speaker;
-                dialogText.textContent = line.text;
+                dialogText.textContent = typeof line.text === 'function' ? line.text() : line.text;
             } else {
                 endDialog();
             }
