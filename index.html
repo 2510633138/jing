@@ -5,1027 +5,224 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>镜</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #000;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Courier New', 'SimSun', 'FangSong', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        .game-container {
-            width: 100%;
-            max-width: 480px;
-            height: 100vh;
-            position: relative;
-            background: #000;
-            overflow: hidden;
-        }
-
-        /* ========== 封面 ========== */
-        #cover-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .pixel-particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .cover-title {
-            font-size: 64px;
-            color: #e8d5b7;
-            letter-spacing: 12px;
-            text-shadow: 0 0 10px rgba(232, 213, 183, 0.6), 0 0 30px rgba(232, 213, 183, 0.3), 2px 2px 0 #3a2a1a;
-            margin-bottom: 60px;
-            z-index: 1;
-        }
-
-        .btn-start {
-            padding: 16px 48px;
-            font-size: 20px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            color: #e8d5b7;
-            background: transparent;
-            border: 3px solid #6b5a4a;
-            cursor: pointer;
-            letter-spacing: 6px;
-            z-index: 1;
-            transition: all 0.3s ease;
-            text-shadow: 0 0 8px rgba(232, 213, 183, 0.5);
-            margin-bottom: 20px;
-        }
-
-        .btn-start:hover {
-            background: rgba(232, 213, 183, 0.1);
-            border-color: #e8d5b7;
-            box-shadow: 0 0 20px rgba(232, 213, 183, 0.2);
-        }
-        .btn-start:active { transform: scale(0.95); }
-
-        .btn-music {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            color: #8a7a6a;
-            background: transparent;
-            border: 2px solid #4a3a2a;
-            cursor: pointer;
-            letter-spacing: 3px;
-            z-index: 1;
-            transition: all 0.3s ease;
-        }
-        .btn-music:hover { color: #e8d5b7; border-color: #6b5a4a; }
-        .btn-music.muted { color: #5a4a3a; border-color: #3a2a1a; text-decoration: line-through; }
-
-        /* ========== 创建角色界面 ========== */
-        #create-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            z-index: 10;
-            padding-top: 80px;
-        }
-        #create-screen.active { display: flex; }
-
-        .eye-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .create-panel {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 24px;
-            padding: 32px 28px;
-            border: 2px solid #5a2020;
-            background: rgba(0, 0, 0, 0.75);
-            border-radius: 4px;
-        }
-
-        .create-title {
-            font-size: 28px;
-            color: #c48b6b;
-            letter-spacing: 6px;
-            text-shadow: 0 0 8px rgba(180, 80, 60, 0.5);
-        }
-
-        .input-name {
-            width: 220px;
-            padding: 10px 14px;
-            font-size: 16px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            color: #e8d5b7;
-            background: #0a0a0a;
-            border: 2px solid #5a2020;
-            outline: none;
-            text-align: center;
-            letter-spacing: 3px;
-        }
-        .input-name::placeholder { color: #4a3030; letter-spacing: 2px; }
-        .input-name:focus { border-color: #a04040; box-shadow: 0 0 12px rgba(160, 60, 60, 0.3); }
-
-        .upload-label {
-            padding: 10px 24px;
-            font-size: 14px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            color: #c48b6b;
-            border: 2px dashed #5a2020;
-            cursor: pointer;
-            letter-spacing: 3px;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        .upload-label:hover { border-color: #a04040; color: #d4a090; }
-
-        #file-input { display: none; }
-
-        .preview-container {
-            width: 80px;
-            height: 80px;
-            border: 2px solid #5a2020;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            background: #0a0a0a;
-        }
-        .preview-container img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
-        .preview-placeholder { color: #3a2020; font-size: 12px; letter-spacing: 2px; }
-
-        .btn-confirm {
-            padding: 12px 40px;
-            font-size: 16px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            color: #c48b6b;
-            background: transparent;
-            border: 2px solid #5a2020;
-            cursor: pointer;
-            letter-spacing: 4px;
-            transition: all 0.3s ease;
-        }
-        .btn-confirm:hover { border-color: #a04040; color: #d4a090; box-shadow: 0 0 12px rgba(160, 60, 60, 0.3); }
-        .btn-confirm:disabled { opacity: 0.3; cursor: not-allowed; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Courier New', 'SimSun', 'FangSong', monospace; display: flex; justify-content: center; align-items: center; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        .game-container { width: 100%; max-width: 480px; height: 100vh; position: relative; background: #000; overflow: hidden; }
+        #cover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        .pixel-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .cover-title { font-size: 64px; color: #e8d5b7; letter-spacing: 12px; text-shadow: 0 0 10px rgba(232,213,183,0.6), 0 0 30px rgba(232,213,183,0.3), 2px 2px 0 #3a2a1a; margin-bottom: 60px; z-index: 1; }
+        .btn-start { padding: 16px 48px; font-size: 20px; font-family: 'Courier New', 'SimSun', monospace; color: #e8d5b7; background: transparent; border: 3px solid #6b5a4a; cursor: pointer; letter-spacing: 6px; z-index: 1; transition: all 0.3s ease; text-shadow: 0 0 8px rgba(232,213,183,0.5); margin-bottom: 20px; }
+        .btn-start:hover { background: rgba(232,213,183,0.1); border-color: #e8d5b7; box-shadow: 0 0 20px rgba(232,213,183,0.2); } .btn-start:active { transform: scale(0.95); }
+        .btn-music { padding: 10px 20px; font-size: 14px; font-family: 'Courier New', 'SimSun', monospace; color: #8a7a6a; background: transparent; border: 2px solid #4a3a2a; cursor: pointer; letter-spacing: 3px; z-index: 1; transition: all 0.3s ease; }
+        .btn-music:hover { color: #e8d5b7; border-color: #6b5a4a; } .btn-music.muted { color: #5a4a3a; border-color: #3a2a1a; text-decoration: line-through; }
+        #create-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 10; padding-top: 80px; }
+        #create-screen.active { display: flex; } .eye-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .create-panel { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 32px 28px; border: 2px solid #5a2020; background: rgba(0,0,0,0.75); border-radius: 4px; }
+        .create-title { font-size: 28px; color: #c48b6b; letter-spacing: 6px; text-shadow: 0 0 8px rgba(180,80,60,0.5); }
+        .input-name { width: 220px; padding: 10px 14px; font-size: 16px; font-family: 'Courier New', 'SimSun', monospace; color: #e8d5b7; background: #0a0a0a; border: 2px solid #5a2020; outline: none; text-align: center; letter-spacing: 3px; }
+        .input-name::placeholder { color: #4a3030; letter-spacing: 2px; } .input-name:focus { border-color: #a04040; box-shadow: 0 0 12px rgba(160,60,60,0.3); }
+        .upload-label { padding: 10px 24px; font-size: 14px; font-family: 'Courier New', 'SimSun', monospace; color: #c48b6b; border: 2px dashed #5a2020; cursor: pointer; letter-spacing: 3px; transition: all 0.3s ease; text-align: center; }
+        .upload-label:hover { border-color: #a04040; color: #d4a090; } #file-input { display: none; }
+        .preview-container { width: 80px; height: 80px; border: 2px solid #5a2020; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #0a0a0a; }
+        .preview-container img { max-width: 100%; max-height: 100%; image-rendering: pixelated; } .preview-placeholder { color: #3a2020; font-size: 12px; letter-spacing: 2px; }
+        .btn-confirm { padding: 12px 40px; font-size: 16px; font-family: 'Courier New', 'SimSun', monospace; color: #c48b6b; background: transparent; border: 2px solid #5a2020; cursor: pointer; letter-spacing: 4px; transition: all 0.3s ease; }
+        .btn-confirm:hover { border-color: #a04040; color: #d4a090; box-shadow: 0 0 12px rgba(160,60,60,0.3); } .btn-confirm:disabled { opacity: 0.3; cursor: not-allowed; }
         .file-name { color: #6b3a2a; font-size: 11px; letter-spacing: 1px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        /* ========== 游戏场景 ========== */
-        #game-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            z-index: 5;
-        }
-        #game-screen.active { display: block; }
-
-        .game-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* 方向按钮 */
-        .dpad {
-            position: absolute;
-            bottom: 60px;
-            left: 20px;
-            width: 120px;
-            height: 120px;
-            z-index: 20;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: 1fr 1fr 1fr;
-            gap: 4px;
-        }
-        .dpad-btn {
-            width: 100%;
-            height: 100%;
-            border: 2px solid rgba(200, 170, 140, 0.6);
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            color: #e8d5b7;
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
-        }
-        .dpad-btn:active {
-            background: rgba(200, 170, 140, 0.4);
-            border-color: rgba(240, 200, 160, 1);
-        }
-        .dpad-center {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(200, 170, 140, 0.3);
-        }
-
-        /* 交互按钮 */
-        .btn-interact {
-            position: absolute;
-            bottom: 60px;
-            right: 30px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: 3px solid rgba(200, 170, 140, 0.6);
-            background: rgba(0, 0, 0, 0.4);
-            color: #c8aa8c;
-            font-size: 14px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            letter-spacing: 2px;
-            z-index: 20;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        .btn-interact:active {
-            background: rgba(200, 170, 140, 0.3);
-            border-color: rgba(240, 200, 160, 0.9);
-        }
-        .btn-interact.glow {
-            border-color: rgba(240, 200, 160, 0.9);
-            box-shadow: 0 0 20px rgba(200, 150, 100, 0.5);
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(200, 150, 100, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(200, 150, 100, 0.7); }
-        }
-
-        /* 对话框 */
-        .dialog-box {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #5a3a2a;
-            padding: 20px;
-            z-index: 25;
-            display: none;
-            border-radius: 4px;
-        }
-        .dialog-box.active { display: block; }
-        .dialog-speaker {
-            color: #c48b6b;
-            font-size: 14px;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-        }
-        .dialog-text {
-            color: #d4c0a8;
-            font-size: 15px;
-            letter-spacing: 2px;
-            line-height: 1.8;
-            min-height: 40px;
-        }
-        .dialog-hint {
-            color: #6b4a3a;
-            font-size: 11px;
-            text-align: right;
-            margin-top: 10px;
-            letter-spacing: 2px;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-                /* 清单弹窗 */
-        .overlay-qingdan {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 30;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .overlay-qingdan.active { display: flex; }
-        .qingdan-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        .qingdan-content img {
-            max-width: 85%;
-            max-height: 65vh;
-            object-fit: contain;
-        }
-        .btn-close-qingdan {
-            padding: 10px 30px;
-            font-size: 16px;
-            font-family: 'Courier New', 'SimSun', monospace;
-            color: #c8a860;
-            background: transparent;
-            border: 2px solid #c8a860;
-            cursor: pointer;
-            letter-spacing: 4px;
-        }
-        .btn-close-qingdan:hover { background: rgba(200, 168, 96, 0.15); }
-
-        /* 六道门 */
-        .doors-container {
-            position: absolute;
-            top: 38%;
-            left: 5%;
-            right: 5%;
-            z-index: 15;
-            display: none;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .doors-container.active { display: flex; }
-        .door-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .door-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-        .door-item img {
-            width: 55px;
-            height: 75px;
-            object-fit: contain;
-        }
-        .door-item span {
-            font-size: 10px;
-            color: #c8a860;
-            font-family: 'Courier New', 'SimSun', monospace;
-            letter-spacing: 1px;
-        }
+        #game-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 5; } #game-screen.active { display: block; }
+        .game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .dpad { position: absolute; bottom: 60px; left: 20px; width: 120px; height: 120px; z-index: 20; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 4px; }
+        .dpad-btn { width: 100%; height: 100%; border: 2px solid rgba(200,170,140,0.6); background: rgba(0,0,0,0.5); border-radius: 8px; color: #e8d5b7; font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
+        .dpad-btn:active { background: rgba(200,170,140,0.4); border-color: rgba(240,200,160,1); } .dpad-center { width: 100%; height: 100%; border-radius: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(200,170,140,0.3); }
+        .btn-interact { position: absolute; bottom: 60px; right: 30px; width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(200,170,140,0.6); background: rgba(0,0,0,0.4); color: #c8aa8c; font-size: 14px; font-family: 'Courier New', 'SimSun', monospace; letter-spacing: 2px; z-index: 20; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .btn-interact:active { background: rgba(200,170,140,0.3); border-color: rgba(240,200,160,0.9); }
+        .btn-interact.glow { border-color: rgba(240,200,160,0.9); box-shadow: 0 0 20px rgba(200,150,100,0.5); animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 15px rgba(200,150,100,0.3); } 50% { box-shadow: 0 0 30px rgba(200,150,100,0.7); } }
+        .dialog-box { position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.85); border: 2px solid #5a3a2a; padding: 20px; z-index: 25; display: none; border-radius: 4px; }
+        .dialog-box.active { display: block; } .dialog-speaker { color: #c48b6b; font-size: 14px; letter-spacing: 3px; margin-bottom: 10px; }
+        .dialog-text { color: #d4c0a8; font-size: 15px; letter-spacing: 2px; line-height: 1.8; min-height: 40px; }
+        .dialog-hint { color: #6b4a3a; font-size: 11px; text-align: right; margin-top: 10px; letter-spacing: 2px; animation: blink 1s infinite; }
+        @keyframes blink { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .overlay-qingdan { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 30; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .overlay-qingdan.active { display: flex; } .qingdan-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .qingdan-content img { max-width: 85%; max-height: 65vh; object-fit: contain; }
+        .btn-close-qingdan { padding: 10px 30px; font-size: 16px; font-family: 'Courier New', 'SimSun', monospace; color: #c8a860; background: transparent; border: 2px solid #c8a860; cursor: pointer; letter-spacing: 4px; }
+        .btn-close-qingdan:hover { background: rgba(200,168,96,0.15); }
+        .doors-container { position: absolute; top: 38%; left: 5%; right: 5%; z-index: 35; display: none; flex-direction: column; gap: 20px; pointer-events: none; }
+        .doors-container.active { display: flex; } .door-row { display: flex; justify-content: center; gap: 10px; }
+        .door-item { display: flex; flex-direction: column; align-items: center; gap: 4px; } .door-item img { width: 55px; height: 75px; object-fit: contain; }
+        .door-item span { font-size: 10px; color: #c8a860; font-family: 'Courier New', 'SimSun', monospace; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-    <div class="game-container" id="game-container">
-        
-        <!-- 封面 -->
-        <div id="cover-screen">
-            <canvas class="pixel-particles" id="particles-canvas"></canvas>
-            <h1 class="cover-title">镜</h1>
-            <button class="btn-start" id="btn-start">开 始 游 戏</button>
-            <button class="btn-music" id="btn-music">🔇 点击开启音乐</button>
+<div class="game-container" id="game-container">
+    <div id="cover-screen"><canvas class="pixel-particles" id="particles-canvas"></canvas><h1 class="cover-title">镜</h1><button class="btn-start" id="btn-start">开 始 游 戏</button><button class="btn-music" id="btn-music">🔇 点击开启音乐</button></div>
+    <div id="create-screen"><canvas class="eye-canvas" id="eye-canvas"></canvas><div class="create-panel"><h2 class="create-title">创 建 角 色</h2><input type="text" class="input-name" id="input-name" placeholder="输入你的名字" maxlength="8"><label class="upload-label" for="file-input">📁 上传形象 (PNG)</label><input type="file" id="file-input" accept="image/png"><div class="preview-container" id="preview-container"><span class="preview-placeholder">预览</span></div><span class="file-name" id="file-name"></span><button class="btn-confirm" id="btn-confirm" disabled>确 认</button></div></div>
+    <div id="game-screen">
+        <img id="altar-img" src="jitan.png" style="display:none;"><img id="god-img" src="zhushen.png" style="display:none;">
+        <canvas class="game-canvas" id="game-canvas"></canvas>
+        <div class="dpad" id="dpad"><div></div><button class="dpad-btn" id="btn-up">▲</button><div></div><button class="dpad-btn" id="btn-left">◀</button><div class="dpad-center"></div><button class="dpad-btn" id="btn-right">▶</button><div></div><button class="dpad-btn" id="btn-down">▼</button><div></div></div>
+        <button class="btn-interact" id="btn-interact">交 互</button>
+        <div class="dialog-box" id="dialog-box"><div class="dialog-speaker" id="dialog-speaker"></div><div class="dialog-text" id="dialog-text"></div><div class="dialog-hint">▼ 点击继续</div></div>
+        <div class="overlay-qingdan" id="overlay-qingdan"><div class="qingdan-content"><img src="qingdan.png" alt="清单"><button class="btn-close-qingdan" id="btn-close-qingdan">关 闭</button></div></div>
+        <div class="doors-container" id="doors-container">
+            <div class="door-row"><div class="door-item" data-door="1"><img src="men1.png"><span>一号门</span></div><div class="door-item" data-door="2"><img src="men2.png"><span>二号门</span></div><div class="door-item" data-door="3"><img src="men3.png"><span>三号门</span></div></div>
+            <div class="door-row"><div class="door-item" data-door="4"><img src="men4.png"><span>四号门</span></div><div class="door-item" data-door="5"><img src="men5.png"><span>五号门</span></div><div class="door-item" data-door="6"><img src="men6.png"><span>六号门</span></div></div>
         </div>
-
-        <!-- 创建角色 -->
-        <div id="create-screen">
-            <canvas class="eye-canvas" id="eye-canvas"></canvas>
-            <div class="create-panel">
-                <h2 class="create-title">创 建 角 色</h2>
-                <input type="text" class="input-name" id="input-name" placeholder="输入你的名字" maxlength="8">
-                <label class="upload-label" for="file-input">📁 上传形象 (PNG)</label>
-                <input type="file" id="file-input" accept="image/png">
-                <div class="preview-container" id="preview-container">
-                    <span class="preview-placeholder">预览</span>
-                </div>
-                <span class="file-name" id="file-name"></span>
-                <button class="btn-confirm" id="btn-confirm" disabled>确 认</button>
-            </div>
-        </div>
-
-        <!-- 游戏场景 -->
-        <div id="game-screen">
-            <img id="altar-img" src="jitan.png" style="display:none;">
-            <img id="god-img" src="zhushen.png" style="display:none;">
-            <canvas class="game-canvas" id="game-canvas"></canvas>
-            
-           <div class="dpad" id="dpad">
-    <div></div>
-    <button class="dpad-btn" id="btn-up">▲</button>
-    <div></div>
-    <button class="dpad-btn" id="btn-left">◀</button>
-    <div class="dpad-center"></div>
-    <button class="dpad-btn" id="btn-right">▶</button>
-    <div></div>
-    <button class="dpad-btn" id="btn-down">▼</button>
-    <div></div>
-</div>
-            
-            <button class="btn-interact" id="btn-interact">交 互</button>
-
-            <div class="dialog-box" id="dialog-box">
-                <div class="dialog-speaker" id="dialog-speaker"></div>
-                <div class="dialog-text" id="dialog-text"></div>
-                <div class="dialog-hint">▼ 点击继续</div>
-            </div>
-        </div>
-            <!-- 清单弹窗 -->
-            <div class="overlay-qingdan" id="overlay-qingdan">
-                <div class="qingdan-content">
-                    <img src="qingdan.png" alt="清单">
-                    <button class="btn-close-qingdan" id="btn-close-qingdan">关 闭</button>
-                </div>
-            </div>
-
-            <!-- 六道门 -->
-            <div class="doors-container" id="doors-container">
-                <div class="door-row">
-                    <div class="door-item" data-door="1"><img src="men1.png"><span>一号门</span></div>
-                    <div class="door-item" data-door="2"><img src="men2.png"><span>二号门</span></div>
-                    <div class="door-item" data-door="3"><img src="men3.png"><span>三号门</span></div>
-                </div>
-                <div class="door-row">
-                    <div class="door-item" data-door="4"><img src="men4.png"><span>四号门</span></div>
-                    <div class="door-item" data-door="5"><img src="men5.png"><span>五号门</span></div>
-                    <div class="door-item" data-door="6"><img src="men6.png"><span>六号门</span></div>
-                </div>
-            </div>
     </div>
-
-    <audio id="bgm" loop preload="auto">
-        <source src="bgm.mp3" type="audio/mpeg">
-    </audio>
-
-    <script>
-        // ========== 全局状态 ==========
-        const container = document.getElementById('game-container');
-        let playerName = '';
-        let playerImage = null;
-        let playerImgObj = new Image();
-
-        // ========== BGM ==========
-        const bgm = document.getElementById('bgm');
-        const btnMusic = document.getElementById('btn-music');
-        let musicStarted = false;
-
-        btnMusic.addEventListener('click', () => {
-            if (!musicStarted) {
-                bgm.play().then(() => {
-                    musicStarted = true;
-                    btnMusic.textContent = '♪ 音乐：开';
-                    btnMusic.classList.remove('muted');
-                }).catch(() => {});
-            } else {
-                if (bgm.paused) { bgm.play(); btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); }
-                else { bgm.pause(); btnMusic.textContent = '🔇 音乐：关'; btnMusic.classList.add('muted'); }
-            }
-        });
-        document.addEventListener('click', function tryPlay() {
-            if (!musicStarted) bgm.play().then(() => { musicStarted = true; btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); }).catch(() => {});
-        }, { once: false });
-
-        // ========== 封面粒子 ==========
-        const particlesCanvas = document.getElementById('particles-canvas');
-        const particlesCtx = particlesCanvas.getContext('2d');
-        let particles = [];
-        function resizeParticlesCanvas() { particlesCanvas.width = container.clientWidth; particlesCanvas.height = container.clientHeight; }
-        class PixelParticle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * particlesCanvas.width;
-                this.y = particlesCanvas.height + Math.random() * 40;
-                this.size = Math.random() < 0.7 ? 2 : 3;
-                this.speed = 0.3 + Math.random() * 0.8;
-                this.opacity = 0.3 + Math.random() * 0.7;
-                this.wobble = Math.random() * Math.PI * 2;
-                this.wobbleSpeed = (Math.random() - 0.5) * 0.02;
-                this.lifespan = 300 + Math.random() * 400;
-                this.age = 0;
-            }
-            update() {
-                this.age++; this.y -= this.speed; this.x += Math.sin(this.wobble) * 0.3; this.wobble += this.wobbleSpeed;
-                const lr = this.age / this.lifespan;
-                this.currentOpacity = lr < 0.2 ? this.opacity * (lr / 0.2) : lr > 0.8 ? this.opacity * ((1 - lr) / 0.2) : this.opacity;
-                if (this.age >= this.lifespan || this.y < -10) this.reset();
-            }
-            draw(ctx) {
-                ctx.fillStyle = `rgba(220, 210, 190, ${this.currentOpacity})`;
-                ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.size, this.size);
-            }
-        }
-        function initParticles() { particles = []; for (let i = 0; i < 80; i++) { const p = new PixelParticle(); p.y = Math.random() * particlesCanvas.height; p.age = Math.floor(Math.random() * p.lifespan); particles.push(p); } }
-        function animateParticles() { particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height); particles.forEach(p => { p.update(); p.draw(particlesCtx); }); requestAnimationFrame(animateParticles); }
-        resizeParticlesCanvas(); initParticles(); animateParticles();
-        window.addEventListener('resize', resizeParticlesCanvas);
-
-        // ========== 眼睛背景 ==========
-        const eyeCanvas = document.getElementById('eye-canvas');
-        const eyeCtx = eyeCanvas.getContext('2d');
-        let eyes = [];
-        function resizeEyeCanvas() { eyeCanvas.width = container.clientWidth; eyeCanvas.height = container.clientHeight; }
-        class FloatingEye {
-            constructor(x, y) {
-                this.originX = x; this.originY = y; this.x = x; this.y = y;
-                this.size = 18 + Math.random() * 35;
-                this.blinkInterval = 100 + Math.random() * 250;
-                this.blinkTimer = Math.floor(Math.random() * this.blinkInterval);
-                this.isBlinking = false; this.blinkProgress = 0;
-                this.blinkSpeed = 0.05 + Math.random() * 0.1;
-                this.floatPhase = Math.random() * Math.PI * 2;
-                this.floatSpeed = 0.005 + Math.random() * 0.015;
-                this.floatRange = 3 + Math.random() * 8;
-                this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.2;
-                this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.2;
-                const rv = 130 + Math.floor(Math.random() * 70);
-                this.irisColor = `rgba(${rv}, ${15+Math.floor(Math.random()*25)}, ${10+Math.floor(Math.random()*20)}, 0.85)`;
-                this.pupilColor = '#0a0000';
-            }
-            update() {
-                this.floatPhase += this.floatSpeed;
-                this.x = this.originX + Math.sin(this.floatPhase) * this.floatRange;
-                this.y = this.originY + Math.cos(this.floatPhase * 1.3) * this.floatRange * 0.6;
-                this.blinkTimer++;
-                if (this.blinkTimer >= this.blinkInterval) { this.isBlinking = true; this.blinkTimer = 0; this.blinkInterval = 80 + Math.random() * 280; }
-                if (this.isBlinking) { this.blinkProgress += this.blinkSpeed; if (this.blinkProgress >= 1) { this.blinkProgress = 1; this.isBlinking = false; } }
-                else if (this.blinkProgress > 0) { this.blinkProgress -= this.blinkSpeed; if (this.blinkProgress < 0) this.blinkProgress = 0; }
-                if (Math.random() < 0.003) { this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.3; this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.3; }
-            }
-            draw(ctx) {
-                const cx = Math.floor(this.x), cy = Math.floor(this.y), s = Math.floor(this.size), halfS = Math.floor(s / 2);
-                const blinkRatio = this.blinkProgress;
-                const eh = Math.floor(halfS * 1.3 * (1 - blinkRatio)), ew = Math.floor(halfS * 1.4);
-                if (eh <= 0) return;
-                for (let dy = -eh; dy <= eh; dy += 2) {
-                    const ratio = Math.abs(dy) / eh, rw = Math.floor(ew * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                    for (let dx = -rw; dx <= rw; dx += 2) {
-                        const ed = Math.abs(dx) / (rw || 1), alpha = 0.35 + 0.25 * (1 - ed);
-                        ctx.fillStyle = `rgba(190, 170, 155, ${alpha})`; ctx.fillRect(cx + dx, cy + dy, 2, 2);
-                    }
-                }
-                const irisR = Math.floor(halfS * 0.55), irisH = Math.floor(irisR * (1 - blinkRatio));
-                if (irisH > 0) {
-                    for (let dy = -irisH; dy <= irisH; dy += 2) {
-                        const ratio = Math.abs(dy) / irisH, rw = Math.floor(irisR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                        for (let dx = -rw; dx <= rw; dx += 2) { ctx.fillStyle = this.irisColor; ctx.fillRect(cx + dx, cy + dy, 2, 2); }
-                    }
-                    const pupilR = Math.floor(irisR * 0.45), px = Math.floor(cx + this.pupilOffsetX * (1 - blinkRatio)), py = Math.floor(cy + this.pupilOffsetY * (1 - blinkRatio));
-                    const ph = Math.floor(pupilR * (1 - blinkRatio));
-                    if (ph > 0) {
-                        for (let dy = -ph; dy <= ph; dy += 2) {
-                            const ratio = Math.abs(dy) / ph, rw = Math.floor(pupilR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                            for (let dx = -rw; dx <= rw; dx += 2) { ctx.fillStyle = this.pupilColor; ctx.fillRect(px + dx, py + dy, 2, 2); }
-                        }
-                    }
-                    const hlR = Math.floor(pupilR * 0.4), hx = cx - Math.floor(irisR * 0.25), hy = cy - Math.floor(irisR * 0.2);
-                    const hlH = Math.floor(hlR * (1 - blinkRatio));
-                    if (hlH > 0) {
-                        for (let dy = -hlH; dy <= hlH; dy += 2) {
-                            const ratio = Math.abs(dy) / hlH, rw = Math.floor(hlR * Math.sqrt(Math.max(0, 1 - ratio * ratio)));
-                            for (let dx = -rw; dx <= rw; dx += 2) { if (Math.random() > 0.4) { ctx.fillStyle = 'rgba(255, 240, 230, 0.7)'; ctx.fillRect(hx + dx, hy + dy, 2, 2); } }
-                        }
-                    }
-                }
-                if (blinkRatio < 0.9) { ctx.strokeStyle = 'rgba(100, 50, 40, 0.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy, ew, eh, 0, 0, Math.PI * 2); ctx.stroke(); }
-            }
-        }
-        function initEyes() {
-            eyes = [];
-            const w = eyeCanvas.width || 480, h = eyeCanvas.height || 800;
-            const positions = [
-                { x: w * 0.08, y: h * 0.06 }, { x: w * 0.22, y: h * 0.04 }, { x: w * 0.75, y: h * 0.05 },
-                { x: w * 0.92, y: h * 0.08 }, { x: w * 0.05, y: h * 0.30 }, { x: w * 0.88, y: h * 0.28 },
-                { x: w * 0.10, y: h * 0.70 }, { x: w * 0.03, y: h * 0.90 }, { x: w * 0.85, y: h * 0.72 },
-                { x: w * 0.93, y: h * 0.88 }, { x: w * 0.70, y: h * 0.92 }, { x: w * 0.45, y: h * 0.95 },
-                { x: w * 0.50, y: h * 0.03 },
-            ];
-            positions.forEach(pos => eyes.push(new FloatingEye(pos.x, pos.y)));
-        }
-        function animateEyes() { eyeCtx.clearRect(0, 0, eyeCanvas.width, eyeCanvas.height); eyes.forEach(e => { e.update(); e.draw(eyeCtx); }); requestAnimationFrame(animateEyes); }
-        resizeEyeCanvas(); initEyes(); animateEyes();
-        window.addEventListener('resize', () => { resizeEyeCanvas(); initEyes(); });
-
-        // ========== 界面切换 ==========
-        const coverScreen = document.getElementById('cover-screen');
-        const createScreen = document.getElementById('create-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const inputName = document.getElementById('input-name');
-        const fileInput = document.getElementById('file-input');
-        const previewContainer = document.getElementById('preview-container');
-        const fileNameDisplay = document.getElementById('file-name');
-        const btnConfirm = document.getElementById('btn-confirm');
-
-        document.getElementById('btn-start').addEventListener('click', () => {
-            coverScreen.style.display = 'none';
-            createScreen.classList.add('active');
-            resizeEyeCanvas(); initEyes();
-        });
-
-        inputName.addEventListener('input', () => { playerName = inputName.value.trim(); checkConfirmReady(); });
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && file.type === 'image/png') {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    playerImage = ev.target.result;
-                    previewContainer.innerHTML = `<img src="${playerImage}" alt="形象预览">`;
-                    fileNameDisplay.textContent = file.name;
-                    checkConfirmReady();
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewContainer.innerHTML = '<span class="preview-placeholder">预览</span>';
-                fileNameDisplay.textContent = ''; playerImage = null; checkConfirmReady();
-            }
-        });
-        function checkConfirmReady() { btnConfirm.disabled = !(playerName.length > 0 && playerImage); }
-
-        btnConfirm.addEventListener('click', () => {
-            if (!playerName || !playerImage) return;
-            playerImgObj.src = playerImage;
-            createScreen.classList.remove('active');
-            gameScreen.classList.add('active');
-            initGameScene();
-        });
-
-        // ========== 游戏场景 ==========
-        const gameCanvas = document.getElementById('game-canvas');
-        const gameCtx = gameCanvas.getContext('2d');
-        const btnInteract = document.getElementById('btn-interact');
-        const dialogBox = document.getElementById('dialog-box');
-        const dialogSpeaker = document.getElementById('dialog-speaker');
-        const dialogText = document.getElementById('dialog-text');
-
-        let gameW, gameH;
-
-        // 玩家
-        let player = { x: 0, y: 0, width: 56, height: 56, speed: 2 };
-        // 祭坛位置（画面中央偏上）
-        let altar = { x: 0, y: 0, width: 160, height: 70 };
-        // 主神（火焰）位置（画面中央偏下）
-        let god = { x: 0, y: 0, radius: 28 };
-        // 移动输入
-        let inputDir = { x: 0, y: 0 };
-        // 对话状态
-        let inDialog = false;
-        let dialogIndex = 0;
-        const godDialogues = [
+</div>
+<audio id="bgm" loop preload="auto"><source src="bgm.mp3" type="audio/mpeg"></audio>
+<script>
+const container = document.getElementById('game-container');
+let playerName = '', playerImage = null, playerImgObj = new Image();
+const bgm = document.getElementById('bgm'); const btnMusic = document.getElementById('btn-music'); let musicStarted = false;
+btnMusic.addEventListener('click', () => { if (!musicStarted) { bgm.play().then(() => { musicStarted = true; btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); }).catch(() => {}); } else { if (bgm.paused) { bgm.play(); btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); } else { bgm.pause(); btnMusic.textContent = '🔇 音乐：关'; btnMusic.classList.add('muted'); } } });
+document.addEventListener('click', function tryPlay() { if (!musicStarted) bgm.play().then(() => { musicStarted = true; btnMusic.textContent = '♪ 音乐：开'; btnMusic.classList.remove('muted'); }).catch(() => {}); }, { once: false });
+const particlesCanvas = document.getElementById('particles-canvas'); const particlesCtx = particlesCanvas.getContext('2d'); let particles = [];
+function resizeParticlesCanvas() { particlesCanvas.width = container.clientWidth; particlesCanvas.height = container.clientHeight; }
+class PixelParticle { constructor() { this.reset(); } reset() { this.x = Math.random() * particlesCanvas.width; this.y = particlesCanvas.height + Math.random() * 40; this.size = Math.random() < 0.7 ? 2 : 3; this.speed = 0.3 + Math.random() * 0.8; this.opacity = 0.3 + Math.random() * 0.7; this.wobble = Math.random() * Math.PI * 2; this.wobbleSpeed = (Math.random() - 0.5) * 0.02; this.lifespan = 300 + Math.random() * 400; this.age = 0; } update() { this.age++; this.y -= this.speed; this.x += Math.sin(this.wobble) * 0.3; this.wobble += this.wobbleSpeed; const lr = this.age / this.lifespan; this.currentOpacity = lr < 0.2 ? this.opacity * (lr / 0.2) : lr > 0.8 ? this.opacity * ((1 - lr) / 0.2) : this.opacity; if (this.age >= this.lifespan || this.y < -10) this.reset(); } draw(ctx) { ctx.fillStyle = `rgba(220,210,190,${this.currentOpacity})`; ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.size, this.size); } }
+function initParticles() { particles = []; for (let i = 0; i < 80; i++) { const p = new PixelParticle(); p.y = Math.random() * particlesCanvas.height; p.age = Math.floor(Math.random() * p.lifespan); particles.push(p); } }
+function animateParticles() { particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height); particles.forEach(p => { p.update(); p.draw(particlesCtx); }); requestAnimationFrame(animateParticles); }
+resizeParticlesCanvas(); initParticles(); animateParticles(); window.addEventListener('resize', resizeParticlesCanvas);
+const eyeCanvas = document.getElementById('eye-canvas'); const eyeCtx = eyeCanvas.getContext('2d'); let eyes = [];
+function resizeEyeCanvas() { eyeCanvas.width = container.clientWidth; eyeCanvas.height = container.clientHeight; }
+class FloatingEye { constructor(x, y) { this.originX = x; this.originY = y; this.x = x; this.y = y; this.size = 18 + Math.random() * 35; this.blinkInterval = 100 + Math.random() * 250; this.blinkTimer = Math.floor(Math.random() * this.blinkInterval); this.isBlinking = false; this.blinkProgress = 0; this.blinkSpeed = 0.05 + Math.random() * 0.1; this.floatPhase = Math.random() * Math.PI * 2; this.floatSpeed = 0.005 + Math.random() * 0.015; this.floatRange = 3 + Math.random() * 8; this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.2; this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.2; const rv = 130 + Math.floor(Math.random() * 70); this.irisColor = `rgba(${rv},${15+Math.floor(Math.random()*25)},${10+Math.floor(Math.random()*20)},0.85)`; this.pupilColor = '#0a0000'; } update() { this.floatPhase += this.floatSpeed; this.x = this.originX + Math.sin(this.floatPhase) * this.floatRange; this.y = this.originY + Math.cos(this.floatPhase * 1.3) * this.floatRange * 0.6; this.blinkTimer++; if (this.blinkTimer >= this.blinkInterval) { this.isBlinking = true; this.blinkTimer = 0; this.blinkInterval = 80 + Math.random() * 280; } if (this.isBlinking) { this.blinkProgress += this.blinkSpeed; if (this.blinkProgress >= 1) { this.blinkProgress = 1; this.isBlinking = false; } } else if (this.blinkProgress > 0) { this.blinkProgress -= this.blinkSpeed; if (this.blinkProgress < 0) this.blinkProgress = 0; } if (Math.random() < 0.003) { this.pupilOffsetX = (Math.random() - 0.5) * this.size * 0.3; this.pupilOffsetY = (Math.random() - 0.5) * this.size * 0.3; } } draw(ctx) { const cx = Math.floor(this.x), cy = Math.floor(this.y), s = Math.floor(this.size), halfS = Math.floor(s / 2), blinkRatio = this.blinkProgress; const eh = Math.floor(halfS * 1.3 * (1 - blinkRatio)), ew = Math.floor(halfS * 1.4); if (eh <= 0) return; for (let dy = -eh; dy <= eh; dy += 2) { const ratio = Math.abs(dy) / eh, rw = Math.floor(ew * Math.sqrt(Math.max(0, 1 - ratio * ratio))); for (let dx = -rw; dx <= rw; dx += 2) { const ed = Math.abs(dx) / (rw || 1), alpha = 0.35 + 0.25 * (1 - ed); ctx.fillStyle = `rgba(190,170,155,${alpha})`; ctx.fillRect(cx + dx, cy + dy, 2, 2); } } const irisR = Math.floor(halfS * 0.55), irisH = Math.floor(irisR * (1 - blinkRatio)); if (irisH > 0) { for (let dy = -irisH; dy <= irisH; dy += 2) { const ratio = Math.abs(dy) / irisH, rw = Math.floor(irisR * Math.sqrt(Math.max(0, 1 - ratio * ratio))); for (let dx = -rw; dx <= rw; dx += 2) { ctx.fillStyle = this.irisColor; ctx.fillRect(cx + dx, cy + dy, 2, 2); } } const pupilR = Math.floor(irisR * 0.45), px = Math.floor(cx + this.pupilOffsetX * (1 - blinkRatio)), py = Math.floor(cy + this.pupilOffsetY * (1 - blinkRatio)), ph = Math.floor(pupilR * (1 - blinkRatio)); if (ph > 0) { for (let dy = -ph; dy <= ph; dy += 2) { const ratio = Math.abs(dy) / ph, rw = Math.floor(pupilR * Math.sqrt(Math.max(0, 1 - ratio * ratio))); for (let dx = -rw; dx <= rw; dx += 2) { ctx.fillStyle = this.pupilColor; ctx.fillRect(px + dx, py + dy, 2, 2); } } } const hlR = Math.floor(pupilR * 0.4), hx = cx - Math.floor(irisR * 0.25), hy = cy - Math.floor(irisR * 0.2), hlH = Math.floor(hlR * (1 - blinkRatio)); if (hlH > 0) { for (let dy = -hlH; dy <= hlH; dy += 2) { const ratio = Math.abs(dy) / hlH, rw = Math.floor(hlR * Math.sqrt(Math.max(0, 1 - ratio * ratio))); for (let dx = -rw; dx <= rw; dx += 2) { if (Math.random() > 0.4) { ctx.fillStyle = 'rgba(255,240,230,0.7)'; ctx.fillRect(hx + dx, hy + dy, 2, 2); } } } } } if (blinkRatio < 0.9) { ctx.strokeStyle = 'rgba(100,50,40,0.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy, ew, eh, 0, 0, Math.PI * 2); ctx.stroke(); } } }
+function initEyes() { eyes = []; const w = eyeCanvas.width || 480, h = eyeCanvas.height || 800; const positions = [{ x: w * 0.08, y: h * 0.06 },{ x: w * 0.22, y: h * 0.04 },{ x: w * 0.75, y: h * 0.05 },{ x: w * 0.92, y: h * 0.08 },{ x: w * 0.05, y: h * 0.30 },{ x: w * 0.88, y: h * 0.28 },{ x: w * 0.10, y: h * 0.70 },{ x: w * 0.03, y: h * 0.90 },{ x: w * 0.85, y: h * 0.72 },{ x: w * 0.93, y: h * 0.88 },{ x: w * 0.70, y: h * 0.92 },{ x: w * 0.45, y: h * 0.95 },{ x: w * 0.50, y: h * 0.03 }]; positions.forEach(pos => eyes.push(new FloatingEye(pos.x, pos.y))); }
+function animateEyes() { eyeCtx.clearRect(0, 0, eyeCanvas.width, eyeCanvas.height); eyes.forEach(e => { e.update(); e.draw(eyeCtx); }); requestAnimationFrame(animateEyes); }
+resizeEyeCanvas(); initEyes(); animateEyes(); window.addEventListener('resize', () => { resizeEyeCanvas(); initEyes(); });
+const coverScreen = document.getElementById('cover-screen'), createScreen = document.getElementById('create-screen'), gameScreen = document.getElementById('game-screen');
+const inputName = document.getElementById('input-name'), fileInput = document.getElementById('file-input'), previewContainer = document.getElementById('preview-container'), fileNameDisplay = document.getElementById('file-name'), btnConfirm = document.getElementById('btn-confirm');
+document.getElementById('btn-start').addEventListener('click', () => { coverScreen.style.display = 'none'; createScreen.classList.add('active'); resizeEyeCanvas(); initEyes(); });
+inputName.addEventListener('input', () => { playerName = inputName.value.trim(); checkConfirmReady(); });
+fileInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file && file.type === 'image/png') { const reader = new FileReader(); reader.onload = (ev) => { playerImage = ev.target.result; previewContainer.innerHTML = `<img src="${playerImage}" alt="形象预览">`; fileNameDisplay.textContent = file.name; checkConfirmReady(); }; reader.readAsDataURL(file); } else { previewContainer.innerHTML = '<span class="preview-placeholder">预览</span>'; fileNameDisplay.textContent = ''; playerImage = null; checkConfirmReady(); } });
+function checkConfirmReady() { btnConfirm.disabled = !(playerName.length > 0 && playerImage); }
+btnConfirm.addEventListener('click', () => { if (!playerName || !playerImage) return; playerImgObj.src = playerImage; createScreen.classList.remove('active'); gameScreen.classList.add('active'); initGameScene(); });
+const gameCanvas = document.getElementById('game-canvas'), gameCtx = gameCanvas.getContext('2d');
+const btnInteract = document.getElementById('btn-interact'), dialogBox = document.getElementById('dialog-box'), dialogSpeaker = document.getElementById('dialog-speaker'), dialogText = document.getElementById('dialog-text');
+let gameW, gameH;
+let player = { x: 0, y: 0, width: 56, height: 56, speed: 2 };
+let altar = { x: 0, y: 0, width: 160, height: 70 };
+let god = { x: 0, y: 0, radius: 28 };
+let inputDir = { x: 0, y: 0 };
+let inDialog = false, dialogIndex = 0, nearDoor = null;
+const godDialogues = [
     { speaker: '江玄贞', text: () => '你终于来了，' + playerName + '。' },
     { speaker: '江玄贞', text: '期中过得怎么样？' },
     { speaker: '江玄贞', text: '经历了这么多，不知道你都收获了什么。' },
     { speaker: '江玄贞', text: '你的收获将决定你前方的路途。' },
 ];
-        function resizeGameCanvas() {
-            gameW = container.clientWidth;
-            gameH = container.clientHeight;
-            gameCanvas.width = gameW;
-            gameCanvas.height = gameH;
-            // 祭坛位置
-            altar.x = gameW / 2 - altar.width / 2;
-            altar.y = gameH * 0.25;
-            // 主神位置
-            god.x = gameW / 2;
-            god.y = gameH * 0.68;
-            // 玩家初始位置（祭坛上）
-            player.x = altar.x + altar.width / 2 - player.width / 2;
-            player.y = altar.y - player.height + 8;
-        }
-
-       function initGameScene() {
-    resizeGameCanvas();
-    initBgParticles();  // 加上这行
-    dialogIndex = 0;
-    inDialog = false;
-    dialogBox.classList.remove('active');
-    btnInteract.classList.remove('glow');
-    gameLoop();
-}
-
-        // ========== 金色粒子背景 ==========
+const doorDialogues = {
+    1: [{ speaker: '江玄贞', text: '我就知道你是最好的学生，没有之一。' },{ speaker: '江玄贞', text: '你完美地完成了所有的任务，取得了满分。' },{ speaker: '江玄贞', text: '我为你骄傲，孩子。' },{ speaker: '江玄贞', text: '回顾一下你的期中，骄傲地领取奖励吧。' }],
+    2: [{ speaker: '江玄贞', text: '虽然你没能取得圆满，但你也保全了自己。' },{ speaker: '江玄贞', text: '盈虚之理教人懂得持中守正，即使略逊一筹，也不必忧虑。' },{ speaker: '江玄贞', text: '这份领悟比任何成绩都珍贵。' },{ speaker: '江玄贞', text: '来看看你得到了什么吧。' }],
+    3: [{ speaker: '江玄贞', text: '你什么也没有带出来。' },{ speaker: '江玄贞', text: '没关系，至少，我们平平安安。' },{ speaker: '江玄贞', text: '不为了外物而损耗了自己，是明智的选择。' },{ speaker: '江玄贞', text: '走下去，看看你的道。' }],
+    4: [{ speaker: '江玄贞', text: '为了几个信物，你最终也迷失在虚无。' },{ speaker: '江玄贞', text: '锦绣荣华终归尘土，带不走，又何必求。' },{ speaker: '江玄贞', text: '好孩子，别逼自己太紧。' },{ speaker: '江玄贞', text: '来看看你走过的路。' }],
+    5: [{ speaker: '江玄贞', text: '人为财死，鸟为食亡。'},{ speaker: '江玄贞', text: '你，却是白白地死去了。' },{ speaker: '江玄贞', text: '阎罗殿上困苦的愚人往往竹篮打水，你也学上了那般德行？' },{ speaker: '江玄贞', text: '进来吧，看看。' }],
+    6: [{ speaker: '江玄贞', text: '空白是最无趣的。' },{ speaker: '江玄贞', text: '你错过了一切，又在终局露面，是为了什么？' },{ speaker: '江玄贞', text: '我也找过你。但你没来过，你根本没来过！' },{ speaker: '江玄贞', text: '来看看你错过的人生。' }],
+};
+const doorVerses = {
+    1: ['历尽尘途千万苦','方酬夙愿始功成','玄黄演尽乾坤道','天地观生万物刍'],
+    2: ['常持水满盈虚戒','笃信盈亏自有期','缺憾方藏真圆满','持中莫使过相欺'],
+    3: ['抛却浮虚方至满','尘缘远隔守本心','青山不移薪火在','困厄千般莫损身'],
+    4: ['浮名何必损形骸','锦绣随棺土内埋','血泪熬空成金凤','半生辛苦附人衣'],
+    5: ['疯癫渡尽世间途','竹汲清波尽作无','一世辛劳何所寄','寒躯谒鬼愧阎罗'],
+    6: ['浮生碌碌度流年','枉向尘寰赴此缘','百事未经空度日','经年饱食负苍天'],
+};
+function resizeGameCanvas() { gameW = container.clientWidth; gameH = container.clientHeight; gameCanvas.width = gameW; gameCanvas.height = gameH; altar.x = gameW / 2 - altar.width / 2; altar.y = gameH * 0.25; god.x = gameW / 2; god.y = gameH * 0.68; player.x = altar.x + altar.width / 2 - player.width / 2; player.y = altar.y - player.height + 8; }
+function initGameScene() { resizeGameCanvas(); initBgParticles(); dialogIndex = 0; inDialog = false; nearDoor = null; dialogBox.classList.remove('active'); btnInteract.classList.remove('glow'); gameLoop(); }
 let bgParticles = [];
-const BG_PARTICLE_COUNT = 40;
-
-function initBgParticles() {
-    bgParticles = [];
-    for (let i = 0; i < BG_PARTICLE_COUNT; i++) {
-        bgParticles.push({
-            x: Math.random() * gameW,
-            y: Math.random() * gameH,
-            size: Math.random() < 0.5 ? 2 : 3,
-            speed: 0.15 + Math.random() * 0.5,
-            opacity: 0.2 + Math.random() * 0.6,
-            wobble: Math.random() * Math.PI * 2,
-            wobbleSpeed: (Math.random() - 0.5) * 0.01,
-        });
-    }
+function initBgParticles() { bgParticles = []; for (let i = 0; i < 40; i++) { bgParticles.push({ x: Math.random() * gameW, y: Math.random() * gameH, size: Math.random() < 0.5 ? 2 : 3, speed: 0.15 + Math.random() * 0.5, opacity: 0.2 + Math.random() * 0.6, wobble: Math.random() * Math.PI * 2, wobbleSpeed: (Math.random() - 0.5) * 0.01 }); } }
+function drawWaveBackground(ctx, w, h) { ctx.fillStyle = '#faf7f0'; ctx.fillRect(0, 0, w, h); bgParticles.forEach(p => { p.y -= p.speed; p.x += Math.sin(p.wobble) * 0.3; p.wobble += p.wobbleSpeed; if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; } ctx.fillStyle = `rgba(200,160,80,${p.opacity})`; ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size); }); }
+function gameLoop() {
+    if (!gameScreen.classList.contains('active')) return;
+    if (jiesuanActive) { jiesuanLoop(); return; }
+    gameCtx.clearRect(0, 0, gameW, gameH);
+    drawWaveBackground(gameCtx, gameW, gameH);
+    const altarImg = document.getElementById('altar-img'); if (altarImg.complete && altarImg.src) { const s = altar.width / altarImg.naturalWidth; gameCtx.drawImage(altarImg, altar.x, altar.y - (altarImg.naturalHeight * s - altar.height), altar.width, altarImg.naturalHeight * s); }
+    const godImg = document.getElementById('god-img'); if (godImg.complete && godImg.src) { const gs = god.radius * 3, r = godImg.naturalWidth / godImg.naturalHeight, dw = gs * r, dh = gs; gameCtx.drawImage(godImg, god.x - dw / 2, god.y - dh / 2, dw, dh); }
+    if (!inDialog && !inDoorDialog) { player.x += inputDir.x * player.speed; player.y += inputDir.y * player.speed; player.x = Math.max(0, Math.min(gameW - player.width, player.x)); player.y = Math.max(0, Math.min(gameH - player.height, player.y)); }
+    if (playerImgObj.complete && playerImgObj.src) { gameCtx.drawImage(playerImgObj, player.x, player.y, player.width, player.height); } else { gameCtx.fillStyle = '#c8aa8c'; gameCtx.fillRect(player.x, player.y, player.width, player.height); }
+    nearDoor = null;
+    if (document.getElementById('doors-container').classList.contains('active')) { document.querySelectorAll('.door-item').forEach(di => { const rect = di.getBoundingClientRect(); const dx = rect.left + rect.width / 2 - container.getBoundingClientRect().left; const dy = rect.top + rect.height / 2 - container.getBoundingClientRect().top; if (Math.hypot((player.x + player.width / 2) - dx, (player.y + player.height / 2) - dy) < 60) nearDoor = di.dataset.door; }); }
+    const distToGod = Math.hypot((player.x + player.width / 2) - god.x, (player.y + player.height / 2) - god.y);
+    if ((distToGod < god.radius + 50 || nearDoor) && !inDialog) btnInteract.classList.add('glow'); else btnInteract.classList.remove('glow');
+    requestAnimationFrame(gameLoop);
 }
-
-function drawWaveBackground(ctx, w, h) {
-    // 白底
-    ctx.fillStyle = '#faf7f0';
-    ctx.fillRect(0, 0, w, h);
-
-    // 金色粒子
-    bgParticles.forEach(p => {
-        p.y -= p.speed;
-        p.x += Math.sin(p.wobble) * 0.3;
-        p.wobble += p.wobbleSpeed;
-        if (p.y < -10) {
-            p.y = h + 10;
-            p.x = Math.random() * w;
-        }
-        ctx.fillStyle = `rgba(200, 160, 80, ${p.opacity})`;
-        ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
-    });
-}
-
-        // ========== 像素祭坛 ==========
-        function drawAltar(ctx, x, y, w, h) {
-            // 底座
-            ctx.fillStyle = '#3a3a3a';
-            ctx.fillRect(x - 5, y + h - 8, w + 10, 12);
-            ctx.fillStyle = '#4a4a4a';
-            ctx.fillRect(x - 3, y + h - 4, w + 6, 8);
-            // 主体
-            ctx.fillStyle = '#555555';
-            ctx.fillRect(x, y, w, h);
-            // 石纹
-            ctx.fillStyle = '#4a4a4a';
-            for (let i = 0; i < 8; i++) {
-                const rx = x + 8 + Math.floor(Math.random() * (w - 16));
-                const ry = y + 4 + Math.floor(Math.random() * (h - 8));
-                ctx.fillRect(rx, ry, 6, 3);
-            }
-            // 顶部
-            ctx.fillStyle = '#666666';
-            ctx.fillRect(x - 6, y - 4, w + 12, 8);
-            // 发光符文
-            ctx.fillStyle = 'rgba(200, 150, 80, 0.7)';
-            ctx.fillRect(x + w / 2 - 8, y + h / 2 - 4, 16, 8);
-            ctx.fillStyle = 'rgba(220, 180, 100, 0.9)';
-            ctx.fillRect(x + w / 2 - 4, y + h / 2 - 2, 8, 4);
-            // 边框
-            ctx.strokeStyle = '#5a5a5a';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, w, h);
-        }
-
-        // ========== 像素火焰主神 ==========
-        function drawGodFlame(ctx, cx, cy, r) {
-            const time = Date.now() * 0.003;
-            // 外层光晕
-            for (let i = 0; i < 30; i++) {
-                const angle = (i / 30) * Math.PI * 2 + time * 0.5;
-                const dist = r * 1.2 + Math.sin(time * 3 + i) * r * 0.3;
-                const px = cx + Math.cos(angle) * dist;
-                const py = cy + Math.sin(angle) * dist;
-                const alpha = 0.15 + Math.random() * 0.2;
-                ctx.fillStyle = `rgba(255, 120, 30, ${alpha})`;
-                ctx.fillRect(Math.floor(px) - 2, Math.floor(py) - 2, 5, 5);
-            }
-            // 火焰主体 - 多层叠加
-            const flameLayers = [
-                { color: 'rgba(255, 60, 10, 0.85)', scale: 0.7, offsetY: 0 },
-                { color: 'rgba(255, 140, 20, 0.9)', scale: 0.55, offsetY: -2 },
-                { color: 'rgba(255, 200, 60, 0.95)', scale: 0.35, offsetY: -3 },
-            ];
-            flameLayers.forEach(layer => {
-                const fr = r * layer.scale;
-                for (let dy = -fr; dy <= fr; dy += 3) {
-                    const rowWidth = Math.floor(fr * Math.sqrt(Math.max(0, 1 - (dy / fr) * (dy / fr))));
-                                        const flicker = 1 + Math.sin(time * 8 + dy * 0.3) * 0.2;
-                    const rw = Math.floor(rowWidth * flicker);
-                    for (let dx = -rw; dx <= rw; dx += 2) {
-                        ctx.fillStyle = layer.color;
-                        ctx.fillRect(Math.floor(cx + dx), Math.floor(cy + dy + layer.offsetY), 3, 3);
-                    }
-                }
-            });
-            // 内核白热
-            const coreR = r * 0.18;
-            for (let dy = -coreR; dy <= coreR; dy += 2) {
-                const rw = Math.floor(coreR * Math.sqrt(Math.max(0, 1 - (dy / coreR) * (dy / coreR))));
-                for (let dx = -rw; dx <= rw; dx += 2) {
-                    ctx.fillStyle = 'rgba(255, 255, 240, 0.95)';
-                    ctx.fillRect(Math.floor(cx + dx), Math.floor(cy + dy), 2, 2);
-                }
-            }
-            // 火星飘散
-            for (let i = 0; i < 12; i++) {
-                const sparkAngle = time * 2 + i * 1.2;
-                const sparkDist = r * 0.6 + Math.sin(time * 5 + i) * r * 0.8;
-                const sx = cx + Math.cos(sparkAngle) * sparkDist;
-                const sy = cy + Math.sin(sparkAngle) * sparkDist - time * 10 % r;
-                ctx.fillStyle = 'rgba(255, 180, 40, 0.7)';
-                ctx.fillRect(Math.floor(sx), Math.floor(sy), 2, 2);
-            }
-        }
-
-        // ========== 游戏主循环 ==========
-        function gameLoop() {
-            if (!gameScreen.classList.contains('active')) return;
-            gameCtx.clearRect(0, 0, gameW, gameH);
-
-            // 波浪暗潮背景
-            drawWaveBackground(gameCtx, gameW, gameH);
-
-           // 画祭坛图片// 画祭坛图片
-const altarImg = document.getElementById('altar-img');
-if (altarImg.complete && altarImg.src) {
-    const scale = altar.width / altarImg.naturalWidth;
-    const drawH = altarImg.naturalHeight * scale;
-    gameCtx.drawImage(altarImg, altar.x, altar.y - (drawH - altar.height), altar.width, drawH);
-}
-
-// 画主神图片
-// 画老师图片
-const godImg = document.getElementById('god-img');
-if (godImg.complete && godImg.src) {
-    const godSize = god.radius * 3;
-    const ratio = godImg.naturalWidth / godImg.naturalHeight;
-    const drawW = godSize * ratio;
-    const drawH = godSize;
-    gameCtx.drawImage(godImg, god.x - drawW / 2, god.y - drawH / 2, drawW, drawH);
-}
-
-            // 更新玩家位置
-            if (!inDialog) {
-                player.x += inputDir.x * player.speed;
-                player.y += inputDir.y * player.speed;
-                // 边界限制
-                player.x = Math.max(0, Math.min(gameW - player.width, player.x));
-                player.y = Math.max(0, Math.min(gameH - player.height, player.y));
-            }
-
-            // 画玩家
-            if (playerImgObj.complete && playerImgObj.src) {
-                gameCtx.drawImage(playerImgObj, player.x, player.y, player.width, player.height);
-            } else {
-                // 占位
-                gameCtx.fillStyle = '#c8aa8c';
-                gameCtx.fillRect(player.x, player.y, player.width, player.height);
-            }
-
-            // 检测是否靠近主神
-            const distToGod = Math.hypot(
-                (player.x + player.width / 2) - god.x,
-                (player.y + player.height / 2) - god.y
-            );
-            if (distToGod < god.radius + 50 && !inDialog) {
-                btnInteract.classList.add('glow');
-            } else {
-                btnInteract.classList.remove('glow');
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // ========== 方向按钮控制 ==========
-        const btnUp = document.getElementById('btn-up');
-        const btnDown = document.getElementById('btn-down');
-        const btnLeft = document.getElementById('btn-left');
-        const btnRight = document.getElementById('btn-right');
-
-function setDir(x, y) {
-    inputDir.x = x;
-    inputDir.y = y;
-}
-
-// 按下
-btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(0, -1); });
-btnUp.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(0, -1); });
-btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(0, 1); });
-btnDown.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(0, 1); });
-btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(-1, 0); });
-btnLeft.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(-1, 0); });
-btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(1, 0); });
-btnRight.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(1, 0); });
-
-// 松开
-btnUp.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
-btnUp.addEventListener('mouseup', () => { setDir(0, 0); });
-btnUp.addEventListener('mouseleave', () => { setDir(0, 0); });
-btnDown.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
-btnDown.addEventListener('mouseup', () => { setDir(0, 0); });
-btnDown.addEventListener('mouseleave', () => { setDir(0, 0); });
-btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
-btnLeft.addEventListener('mouseup', () => { setDir(0, 0); });
-btnLeft.addEventListener('mouseleave', () => { setDir(0, 0); });
-btnRight.addEventListener('touchend', (e) => { e.preventDefault(); setDir(0, 0); });
-btnRight.addEventListener('mouseup', () => { setDir(0, 0); });
-btnRight.addEventListener('mouseleave', () => { setDir(0, 0); });
-        // 键盘支持（方便电脑测试）
-        const keys = {};
-        window.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-            updateKeyboardInput();
-        });
-        window.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-            updateKeyboardInput();
-        });
-        function updateKeyboardInput() {
-            inputDir.x = 0; inputDir.y = 0;
-            if (keys['ArrowLeft'] || keys['a']) inputDir.x = -1;
-            if (keys['ArrowRight'] || keys['d']) inputDir.x = 1;
-            if (keys['ArrowUp'] || keys['w']) inputDir.y = -1;
-            if (keys['ArrowDown'] || keys['s']) inputDir.y = 1;
-        }
-
-        // ========== 交互按钮 ==========
-        btnInteract.addEventListener('click', () => {
-            if (inDialog) return;
-            const distToGod = Math.hypot(
-                (player.x + player.width / 2) - god.x,
-                (player.y + player.height / 2) - god.y
-            );
-            if (distToGod < god.radius + 40) {
-                startDialog();
-            }
-        });
-
-        function startDialog() {
-            inDialog = true;
-            dialogIndex = 0;
-            inputDir.x = 0; inputDir.y = 0;
-            dialogBox.classList.add('active');
-            showDialogLine();
-        }
-
-        function showDialogLine() {
-            if (dialogIndex < godDialogues.length) {
-                const line = godDialogues[dialogIndex];
-                dialogSpeaker.textContent = line.speaker;
-                dialogText.textContent = typeof line.text === 'function' ? line.text() : line.text;
-            } else {
-                endDialog();
-            }
-        }
-
-        function endDialog() {
-    dialogBox.classList.remove('active');
-    inDialog = false;
-    // 显示清单
-    document.getElementById('overlay-qingdan').classList.add('active');
-}
-
-// 关闭清单 → 显示六道门
-document.getElementById('btn-close-qingdan').addEventListener('click', () => {
-    document.getElementById('overlay-qingdan').classList.remove('active');
-    document.getElementById('doors-container').classList.add('active');
+const btnUp = document.getElementById('btn-up'), btnDown = document.getElementById('btn-down'), btnLeft = document.getElementById('btn-left'), btnRight = document.getElementById('btn-right');
+function setDir(x, y) { inputDir.x = x; inputDir.y = y; }
+btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(0, -1); }); btnUp.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(0, -1); });
+btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(0, 1); }); btnDown.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(0, 1); });
+btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(-1, 0); }); btnLeft.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(-1, 0); });
+btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); setDir(1, 0); }); btnRight.addEventListener('mousedown', (e) => { e.preventDefault(); setDir(1, 0); });
+[btnUp,btnDown,btnLeft,btnRight].forEach(b => { b.addEventListener('touchend', () => setDir(0,0)); b.addEventListener('mouseup', () => setDir(0,0)); b.addEventListener('mouseleave', () => setDir(0,0)); });
+const keys = {};
+window.addEventListener('keydown', (e) => { keys[e.key] = true; updateKeyboardInput(); });
+window.addEventListener('keyup', (e) => { keys[e.key] = false; updateKeyboardInput(); });
+function updateKeyboardInput() { inputDir.x = 0; inputDir.y = 0; if (keys['ArrowLeft'] || keys['a']) inputDir.x = -1; if (keys['ArrowRight'] || keys['d']) inputDir.x = 1; if (keys['ArrowUp'] || keys['w']) inputDir.y = -1; if (keys['ArrowDown'] || keys['s']) inputDir.y = 1; }
+let currentDoor = null, doorDialogIndex = 0, inDoorDialog = false;
+btnInteract.addEventListener('click', () => {
+    if (inDialog || inDoorDialog) return;
+    if (nearDoor && document.getElementById('doors-container').classList.contains('active')) {
+        currentDoor = nearDoor; doorDialogIndex = 0; inDoorDialog = true; inputDir.x = 0; inputDir.y = 0;
+        startJiesuanScene();
+    } else { const d = Math.hypot((player.x + player.width / 2) - god.x, (player.y + player.height / 2) - god.y); if (d < god.radius + 40) startDialog(); }
 });
-        dialogBox.addEventListener('click', () => {
-            if (!inDialog) return;
-            dialogIndex++;
-            showDialogLine();
-        });
+function startDialog() { inDialog = true; dialogIndex = 0; inputDir.x = 0; inputDir.y = 0; dialogBox.classList.add('active'); showDialogLine(); }
+function showDialogLine() { if (dialogIndex < godDialogues.length) { const l = godDialogues[dialogIndex]; dialogSpeaker.textContent = l.speaker; dialogText.textContent = typeof l.text === 'function' ? l.text() : l.text; } else { endDialog(); } }
+function endDialog() { dialogBox.classList.remove('active'); inDialog = false; document.getElementById('overlay-qingdan').classList.add('active'); }
+document.getElementById('btn-close-qingdan').addEventListener('click', () => { document.getElementById('overlay-qingdan').classList.remove('active'); document.getElementById('doors-container').classList.add('active'); });
+function showDoorDialogLine() { const lines = doorDialogues[currentDoor]; if (lines && doorDialogIndex < lines.length) { const l = lines[doorDialogIndex]; dialogSpeaker.textContent = l.speaker; dialogText.textContent = l.text; } else { dialogBox.classList.remove('active'); inDoorDialog = false; } }
+dialogBox.addEventListener('click', () => { if (inDoorDialog) { doorDialogIndex++; showDoorDialogLine(); } else if (inDialog) { dialogIndex++; showDialogLine(); } });
+window.addEventListener('resize', () => { if (gameScreen.classList.contains('active')) resizeGameCanvas(); });
 
-        // ========== 窗口大小调整 ==========
-        window.addEventListener('resize', () => {
-            if (gameScreen.classList.contains('active')) {
-                resizeGameCanvas();
-            }
-        });
-    </script>
+let jiesuanActive = false, jiesuanBgImg = new Image(); jiesuanBgImg.src = 'beijing.png';
+let jiesuanScrollY = 0, jiesuanWorldY = 0;
+let verseTriggered = [false,false,false,false], verseAlpha = [0,0,0,0];
+let verseWorldY = [600,1000,1400,1800], jiesuanPhase = 0;
+
+function startJiesuanScene() {
+    jiesuanActive = true; jiesuanScrollY = 0; jiesuanWorldY = 0;
+    verseTriggered = [false,false,false,false]; verseAlpha = [0,0,0,0]; jiesuanPhase = 0;
+    hideGameUI(); inputDir.x = 0; inputDir.y = 0;
+    doorDialogIndex = 0; inDoorDialog = true; dialogBox.classList.add('active'); showDoorDialogLine();
+    jiesuanLoop();
+}
+function hideGameUI() { document.getElementById('dpad').style.display = ''; document.getElementById('btn-interact').style.display = ''; document.getElementById('doors-container').classList.remove('active'); }
+function showGameUI() { document.getElementById('dpad').style.display = ''; document.getElementById('btn-interact').style.display = ''; document.getElementById('doors-container').classList.add('active'); }
+
+function jiesuanLoop() {
+    if (!jiesuanActive) return;
+    gameCtx.clearRect(0, 0, gameW, gameH);
+    if (jiesuanBgImg.complete) { const sc = Math.max(gameW / jiesuanBgImg.naturalWidth, gameH / jiesuanBgImg.naturalHeight); const sw = jiesuanBgImg.naturalWidth * sc, sh = jiesuanBgImg.naturalHeight * sc; const y1 = jiesuanScrollY % sh, y2 = y1 - sh; gameCtx.drawImage(jiesuanBgImg, (gameW - sw) / 2, y1, sw, sh); gameCtx.drawImage(jiesuanBgImg, (gameW - sw) / 2, y2, sw, sh); }
+    if (!inDoorDialog) {
+        if (inputDir.y < 0) { jiesuanScrollY += player.speed; jiesuanWorldY += player.speed; }
+        if (inputDir.y > 0 && jiesuanWorldY > 0) { jiesuanScrollY -= player.speed; jiesuanWorldY -= player.speed; }
+        for (let i = 0; i < 4; i++) { if (!verseTriggered[i] && jiesuanWorldY > verseWorldY[i]) verseTriggered[i] = true; }
+        if (verseTriggered[0]) verseAlpha[0] = Math.min(1, verseAlpha[0] + 0.005);
+        if (verseTriggered[1]) verseAlpha[1] = Math.min(1, verseAlpha[1] + 0.005);
+        if (verseTriggered[2]) verseAlpha[2] = Math.min(1, verseAlpha[2] + 0.005);
+        if (verseTriggered[3]) verseAlpha[3] = Math.min(1, verseAlpha[3] + 0.005);
+        if (verseAlpha[3] > 0.95) jiesuanPhase = 9;
+    }
+    const playerScreenY = gameH * 0.75;
+    if (playerImgObj.complete && playerImgObj.src) gameCtx.drawImage(playerImgObj, gameW / 2 - 28, playerScreenY, 56, 56);
+    const verses = doorVerses[currentDoor] || doorVerses[1];
+    const texts = [
+        { text: verses[0], x: gameW * 0.78, worldY: verseWorldY[0] },
+        { text: verses[1], x: gameW * 0.08, worldY: verseWorldY[1] },
+        { text: verses[2], x: gameW * 0.88, worldY: verseWorldY[2] },
+        { text: verses[3], x: gameW * 0.18, worldY: verseWorldY[3] },
+    ];
+    for (let i = 0; i < 4; i++) {
+        if (verseAlpha[i] > 0) { const screenY = texts[i].worldY - jiesuanWorldY + playerScreenY; if (screenY > -200 && screenY < gameH + 200) drawVertGoldText(gameCtx, texts[i].text, texts[i].x, screenY, verseAlpha[i]); }
+    }
+    if (jiesuanPhase >= 9) drawGoldText(gameCtx, '点击返回', gameW / 2 - 50, gameH * 0.88, 0.6 + Math.sin(Date.now() * 0.005) * 0.3);
+    requestAnimationFrame(jiesuanLoop);
+}
+function drawVertGoldText(ctx, text, x, y, alpha) {
+    const chars = text.split(''); ctx.font = 'bold 20px "Courier New","SimSun","FangSong",monospace'; ctx.textBaseline = 'top';
+    chars.forEach((char, i) => { const py = y + i * 26; const flicker = 1 + Math.sin(Date.now() * 0.004 + i * 0.5) * 0.08; ctx.fillStyle = `rgba(200,150,50,${alpha * 0.15 * flicker})`; ctx.fillText(char, x - 1, py - 1); ctx.fillText(char, x + 1, py - 1); ctx.fillStyle = `rgba(240,200,80,${alpha * flicker})`; ctx.fillText(char, x, py); ctx.fillStyle = `rgba(255,240,200,${alpha * 0.3 * flicker})`; ctx.fillText(char, x, py); });
+}
+function drawGoldText(ctx, text, x, y, alpha) { ctx.font = 'bold 16px "Courier New","SimSun","FangSong",monospace'; ctx.textBaseline = 'top'; ctx.fillStyle = `rgba(240,200,80,${alpha})`; ctx.fillText(text, x, y); }
+gameCanvas.addEventListener('click', () => { if (jiesuanActive && jiesuanPhase >= 9) { jiesuanActive = false; showGameUI(); initGameScene(); } });
+</script>
 </body>
 </html>
