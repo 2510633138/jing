@@ -7,8 +7,9 @@
     <title>镜</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; background: #000; margin: 0; padding: 0; position: fixed; top: 0; left: 0; }
-        body { font-family: 'Courier New', 'SimSun', 'FangSong', monospace; display: flex; justify-content: center; align-items: center; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        html, body, .game-container { margin: 0 !important; padding: 0 !important; border: none !important; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+        body { font-family: 'Courier New', 'SimSun', 'FangSong', monospace; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         .game-container { position: relative; background: #000; overflow: hidden; }
         #cover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
         .pixel-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -92,15 +93,26 @@
 </div>
 <audio id="bgm" loop preload="auto"><source src="bgm.mp3" type="audio/mpeg"></audio>
 <script>
+window.addEventListener('DOMContentLoaded', function() {
+    setFullScreen();
+});
+
 function setFullScreen() {
     var c = document.getElementById('game-container');
-    c.style.width = window.innerWidth + 'px';
-    c.style.height = window.innerHeight + 'px';
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
     c.style.position = 'fixed';
     c.style.top = '0';
     c.style.left = '0';
+    c.style.margin = '0';
+    c.style.padding = '0';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.documentElement.style.margin = '0';
+    document.documentElement.style.padding = '0';
 }
-setFullScreen();
 window.addEventListener('resize', setFullScreen);
 window.addEventListener('orientationchange', function() { setTimeout(setFullScreen, 100); });
 
@@ -216,7 +228,7 @@ window.addEventListener('resize', () => { if (gameScreen.classList.contains('act
 let jiesuanActive = false, jiesuanBgImg = new Image(); jiesuanBgImg.src = 'beijing.png';
 let jiesuanScrollY = 0, jiesuanWorldY = 0;
 let verseTriggered = [false,false,false,false], verseAlpha = [0,0,0,0];
-let verseWorldY = [600,1000,1400,1800], jiesuanPhase = 0;
+let verseWorldY = [300, 550, 800, 1050], jiesuanPhase = 0;
 
 function startJiesuanScene() {
     jiesuanActive = true; jiesuanScrollY = 0; jiesuanWorldY = 0;
