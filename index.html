@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -51,6 +52,16 @@
         .doors-container.active { display: flex; } .door-row { display: flex; justify-content: center; gap: 10px; }
         .door-item { display: flex; flex-direction: column; align-items: center; gap: 4px; } .door-item img { width: 55px; height: 75px; object-fit: contain; }
         .door-item span { font-size: 10px; color: #c8a860; font-family: 'Courier New', 'SimSun', monospace; letter-spacing: 1px; }
+        .settlement-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .settlement-overlay.active { display: flex; }
+        .settlement-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .settlement-title { font-size: 36px; color: #fff; letter-spacing: 4px; text-shadow: 2px 2px 0 #c00, -2px -2px 0 #c00, 2px -2px 0 #c00, -2px 2px 0 #c00; animation: shake 0.3s infinite; z-index: 1; margin-bottom: 20px; }
+        @keyframes shake { 0%,100% { transform: translate(0,0); } 25% { transform: translate(-2px,1px); } 50% { transform: translate(2px,-1px); } 75% { transform: translate(-1px,-1px); } }
+        .settlement-verses { font-size: 20px; color: #d4a017; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,200,50,0.8), 0 0 20px rgba(255,180,30,0.5); z-index: 1; text-align: center; line-height: 1.8; margin-bottom: 20px; }
+        .settlement-reward-label { font-size: 20px; color: #fff; letter-spacing: 3px; text-shadow: 1px 1px 0 #c8a860, -1px -1px 0 #c8a860, 1px -1px 0 #c8a860, -1px 1px 0 #c8a860; z-index: 1; margin-bottom: 10px; }
+        .settlement-reward { font-size: 18px; color: #fff; letter-spacing: 2px; z-index: 1; text-align: center; line-height: 1.6; }
+        .settlement-exit { margin-top: 30px; padding: 10px 30px; font-size: 16px; font-family: 'Courier New', 'SimSun', monospace; color: #c8a860; background: transparent; border: 2px solid #c8a860; cursor: pointer; letter-spacing: 4px; z-index: 1; }
+        .settlement-exit:hover { background: rgba(200,168,96,0.15); }
     </style>
 </head>
 <body>
@@ -67,6 +78,14 @@
         <div class="doors-container" id="doors-container">
             <div class="door-row"><div class="door-item" data-door="1"><img src="men1.png"><span>一号门</span></div><div class="door-item" data-door="2"><img src="men2.png"><span>二号门</span></div><div class="door-item" data-door="3"><img src="men3.png"><span>三号门</span></div></div>
             <div class="door-row"><div class="door-item" data-door="4"><img src="men4.png"><span>四号门</span></div><div class="door-item" data-door="5"><img src="men5.png"><span>五号门</span></div><div class="door-item" data-door="6"><img src="men6.png"><span>六号门</span></div></div>
+        </div>
+        <div class="settlement-overlay" id="settlement-overlay">
+            <canvas class="settlement-particles" id="settlement-particles-canvas"></canvas>
+            <div class="settlement-title" id="settlement-title">结局一</div>
+            <div class="settlement-verses" id="settlement-verses"></div>
+            <div class="settlement-reward-label">奖励：</div>
+            <div class="settlement-reward" id="settlement-reward"></div>
+            <button class="settlement-exit" id="settlement-exit">退 出</button>
         </div>
     </div>
 </div>
@@ -119,12 +138,20 @@ const doorDialogues = {
     6: [{ speaker: '江玄贞', text: '空白是最无趣的。' },{ speaker: '江玄贞', text: '你错过了一切。' },{ speaker: '江玄贞', text: '我们也找过你。但你根本没来过。' },{ speaker: '江玄贞', text: '这是你的结局。' }],
 };
 const doorVerses = {
-    1: ['历尽尘途千万苦','方酬夙愿始功成','玄黄演尽乾坤道','天地观生万物刍'],
-    2: ['常持水满盈虚戒','笃信盈亏自有期','缺憾方藏真圆满','持中莫使过相欺'],
-    3: ['抛却浮虚方至满','尘缘远隔守本心','青山不移薪火在','困厄千般莫损身'],
-    4: ['浮名何必损形骸','锦绣随棺土内埋','血泪熬空成金凤','半生辛苦附人衣'],
-    5: ['疯癫渡尽世间途','竹汲清波尽作无','一世辛劳何所寄','寒躯谒鬼愧阎罗'],
-    6: ['浮生碌碌度流年','枉向尘寰赴此缘','百事未经空度日','经年饱食负苍天'],
+    1: ['历尽尘途千万苦，','方酬夙愿始功成。','玄黄演尽乾坤道，','天地观生万物刍。'],
+    2: ['常持水满盈虚戒，','笃信盈亏自有期。','缺憾方藏真圆满，','持中莫使过相欺。'],
+    3: ['抛却浮虚方至满，','尘缘远隔守本心。','青山不移薪火在，','困厄千般莫损身。'],
+    4: ['浮名何必损形骸，','锦绣随棺土内埋。','血泪熬空成金凤，','半生辛苦附人衣。'],
+    5: ['疯癫渡尽世间途，','竹汲清波尽作无。','一世辛劳何所寄，','寒躯谒鬼愧阎罗。'],
+    6: ['浮生碌碌度流年，','枉向尘寰赴此缘。','百事未经空度日，','经年饱食负苍天。'],
+};
+const doorRewards = {
+    1: '银票*25<br>期中限定道具购买权（1号位）',
+    2: '银票*18<br>期中限定道具购买权（2号位）',
+    3: '银票*13<br>期中限定道具购买权（3号位）',
+    4: '银票*8<br>期中限定道具购买权（4号位）',
+    5: '参与奖小药丸两颗，分别可回san1，hp1<br>重在参与',
+    6: '什么都没参加没有奖励！！！！<br>好好学习！！',
 };
 function resizeGameCanvas() { gameW = container.clientWidth; gameH = container.clientHeight; gameCanvas.width = gameW; gameCanvas.height = gameH; altar.x = gameW / 2 - altar.width / 2; altar.y = gameH * 0.25; god.x = gameW / 2; god.y = gameH * 0.68; player.x = altar.x + altar.width / 2 - player.width / 2; player.y = altar.y - player.height + 8; }
 function initGameScene() { resizeGameCanvas(); initBgParticles(); dialogIndex = 0; inDialog = false; nearDoor = null; dialogBox.classList.remove('active'); btnInteract.classList.remove('glow'); gameLoop(); }
@@ -193,13 +220,13 @@ function jiesuanLoop() {
     gameCtx.clearRect(0, 0, gameW, gameH);
     if (jiesuanBgImg.complete) { const sc = Math.max(gameW / jiesuanBgImg.naturalWidth, gameH / jiesuanBgImg.naturalHeight); const sw = jiesuanBgImg.naturalWidth * sc, sh = jiesuanBgImg.naturalHeight * sc; const y1 = jiesuanScrollY % sh, y2 = y1 - sh; gameCtx.drawImage(jiesuanBgImg, (gameW - sw) / 2, y1, sw, sh); gameCtx.drawImage(jiesuanBgImg, (gameW - sw) / 2, y2, sw, sh); }
     if (!inDoorDialog) {
-        if (inputDir.y < 0) { jiesuanScrollY += player.speed; jiesuanWorldY += player.speed; }
-        if (inputDir.y > 0 && jiesuanWorldY > 0) { jiesuanScrollY -= player.speed; jiesuanWorldY -= player.speed; }
+        if (inputDir.y < 0) { jiesuanScrollY += player.speed * 0.5; jiesuanWorldY += player.speed * 0.5; }
+        if (inputDir.y > 0 && jiesuanWorldY > 0) { jiesuanScrollY -= player.speed * 0.5; jiesuanWorldY -= player.speed * 0.5; }
         for (let i = 0; i < 4; i++) { if (!verseTriggered[i] && jiesuanWorldY > verseWorldY[i]) verseTriggered[i] = true; }
-        if (verseTriggered[0]) verseAlpha[0] = Math.min(1, verseAlpha[0] + 0.005);
-        if (verseTriggered[1]) verseAlpha[1] = Math.min(1, verseAlpha[1] + 0.005);
-        if (verseTriggered[2]) verseAlpha[2] = Math.min(1, verseAlpha[2] + 0.005);
-        if (verseTriggered[3]) verseAlpha[3] = Math.min(1, verseAlpha[3] + 0.005);
+        if (verseTriggered[0]) verseAlpha[0] = Math.min(1, verseAlpha[0] + 0.002);
+        if (verseTriggered[1]) verseAlpha[1] = Math.min(1, verseAlpha[1] + 0.002);
+        if (verseTriggered[2]) verseAlpha[2] = Math.min(1, verseAlpha[2] + 0.002);
+        if (verseTriggered[3]) verseAlpha[3] = Math.min(1, verseAlpha[3] + 0.002);
         if (verseAlpha[3] > 0.95) jiesuanPhase = 9;
     }
     const playerScreenY = gameH * 0.75;
@@ -218,11 +245,42 @@ function jiesuanLoop() {
     requestAnimationFrame(jiesuanLoop);
 }
 function drawVertGoldText(ctx, text, x, y, alpha) {
-    const chars = text.split(''); ctx.font = 'bold 20px "Courier New","SimSun","FangSong",monospace'; ctx.textBaseline = 'top';
-    chars.forEach((char, i) => { const py = y + i * 26; const flicker = 1 + Math.sin(Date.now() * 0.004 + i * 0.5) * 0.08; ctx.fillStyle = `rgba(200,150,50,${alpha * 0.15 * flicker})`; ctx.fillText(char, x - 1, py - 1); ctx.fillText(char, x + 1, py - 1); ctx.fillStyle = `rgba(240,200,80,${alpha * flicker})`; ctx.fillText(char, x, py); ctx.fillStyle = `rgba(255,240,200,${alpha * 0.3 * flicker})`; ctx.fillText(char, x, py); });
+    const chars = text.split(''); ctx.font = 'bold 32px "Courier New","SimSun","FangSong",monospace'; ctx.textBaseline = 'top';
+    chars.forEach((char, i) => { const py = y + i * 40; const flicker = 1 + Math.sin(Date.now() * 0.003 + i * 0.5) * 0.06;
+        ctx.shadowColor = `rgba(200,160,60,${alpha * flicker})`; ctx.shadowBlur = 8;
+        ctx.fillStyle = '#1a1008'; ctx.fillText(char, x, py);
+        ctx.shadowColor = `rgba(255,200,80,${alpha * flicker})`; ctx.shadowBlur = 4;
+        ctx.fillStyle = '#1a1008'; ctx.fillText(char, x, py);
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    });
 }
-function drawGoldText(ctx, text, x, y, alpha) { ctx.font = 'bold 16px "Courier New","SimSun","FangSong",monospace'; ctx.textBaseline = 'top'; ctx.fillStyle = `rgba(240,200,80,${alpha})`; ctx.fillText(text, x, y); }
-gameCanvas.addEventListener('click', () => { if (jiesuanActive && jiesuanPhase >= 9) { jiesuanActive = false; showGameUI(); initGameScene(); } });
+function drawGoldText(ctx, text, x, y, alpha) { ctx.font = 'bold 20px "Courier New","SimSun","FangSong",monospace'; ctx.textBaseline = 'top'; ctx.fillStyle = `rgba(30,20,10,${alpha})`; ctx.fillText(text, x, y); }
+gameCanvas.addEventListener('click', () => { if (jiesuanActive && jiesuanPhase >= 9) { jiesuanActive = false; showSettlement(); } });
+
+function showSettlement() {
+    document.getElementById('settlement-overlay').classList.add('active');
+    document.getElementById('settlement-title').textContent = '结局' + currentDoor;
+    const verses = doorVerses[currentDoor] || doorVerses[1];
+    document.getElementById('settlement-verses').innerHTML = verses[0] + verses[1] + '<br>' + verses[2] + verses[3];
+    document.getElementById('settlement-reward').innerHTML = doorRewards[currentDoor] || '1';
+    initSettlementParticles();
+}
+
+const settlementParticlesCanvas = document.getElementById('settlement-particles-canvas');
+const settlementParticlesCtx = settlementParticlesCanvas.getContext('2d');
+let settlementParticles = [];
+function resizeSettlementParticlesCanvas() { settlementParticlesCanvas.width = container.clientWidth; settlementParticlesCanvas.height = container.clientHeight; }
+class SettlementParticle {
+    constructor() { this.reset(); }
+    reset() { this.x = Math.random() * settlementParticlesCanvas.width; this.y = Math.random() * settlementParticlesCanvas.height; this.size = Math.random() < 0.5 ? 2 : 3; this.speedY = -(0.2 + Math.random() * 0.6); this.speedX = (Math.random() - 0.5) * 0.4; this.opacity = 0.3 + Math.random() * 0.7; this.lifespan = 200 + Math.random() * 300; this.age = Math.floor(Math.random() * this.lifespan); }
+    update() { this.age++; this.x += this.speedX; this.y += this.speedY; if (this.age >= this.lifespan || this.y < -10) this.reset(); }
+    draw(ctx) { const lr = this.age / this.lifespan; const alpha = lr < 0.2 ? this.opacity * (lr / 0.2) : lr > 0.8 ? this.opacity * ((1 - lr) / 0.2) : this.opacity; ctx.fillStyle = `rgba(255,255,255,${alpha})`; ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.size, this.size); }
+}
+function initSettlementParticles() { resizeSettlementParticlesCanvas(); settlementParticles = []; for (let i = 0; i < 100; i++) { settlementParticles.push(new SettlementParticle()); } animateSettlementParticles(); }
+function animateSettlementParticles() { if (!document.getElementById('settlement-overlay').classList.contains('active')) return; settlementParticlesCtx.clearRect(0, 0, settlementParticlesCanvas.width, settlementParticlesCanvas.height); settlementParticles.forEach(p => { p.update(); p.draw(settlementParticlesCtx); }); requestAnimationFrame(animateSettlementParticles); }
+
+document.getElementById('settlement-exit').addEventListener('click', () => { window.close(); });
 </script>
 </body>
 </html>
+```
