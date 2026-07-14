@@ -7,7 +7,7 @@
     <title>镜</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #000; margin: 0; padding: 0; position: fixed; top: 0; left: 0; }
         body { font-family: 'Courier New', 'SimSun', 'FangSong', monospace; display: flex; justify-content: center; align-items: center; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         .game-container { position: relative; background: #000; overflow: hidden; }
         #cover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
@@ -92,11 +92,13 @@
 </div>
 <audio id="bgm" loop preload="auto"><source src="bgm.mp3" type="audio/mpeg"></audio>
 <script>
-// 强制适配手机全屏
 function setFullScreen() {
     var c = document.getElementById('game-container');
     c.style.width = window.innerWidth + 'px';
     c.style.height = window.innerHeight + 'px';
+    c.style.position = 'fixed';
+    c.style.top = '0';
+    c.style.left = '0';
 }
 setFullScreen();
 window.addEventListener('resize', setFullScreen);
